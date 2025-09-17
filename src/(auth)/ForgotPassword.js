@@ -1,0 +1,195 @@
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Image,
+} from 'react-native';
+import { useState } from 'react';
+import Checkbox from 'expo-checkbox';
+import { useFormik } from 'formik';
+import { forgotPassValidation } from '../../validation/formvalidation';
+import back from "../../assets/images/back.png"
+
+const ForgotPassword = ({ navigation }) => {
+  const initialValue = {
+    email: '',
+  };
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  const { values, handleChange, handleSubmit, errors, touched } = useFormik({
+    initialValues: initialValue,
+    validationSchema: forgotPassValidation,
+    onSubmit: (values) => {
+      navigation.navigate("VerifyOtp", values)
+    },
+  });
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.subTitle}>Enter valid email to receive otp</Text>
+
+        {/* back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate('SignIn')}
+        >
+          <Image source={back} style={{height: 18, width: 18, tintColor: "#6B7280"}} />
+          <Text style={styles.backButtonText}>Back to sign in</Text>
+        </TouchableOpacity>
+
+        {/* input field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="example@gmail.com"
+            value={values.email}
+            onChangeText={handleChange('email')}
+            style={styles.inputField}
+          />
+          {touched.email && errors.email && (
+            <Text style={styles.errorrmessage}>{errors.email}</Text>
+          )}
+
+          {/* checkbox */}
+          <View style={styles.checkBoxContainer}>
+            <Checkbox
+              value={isChecked}
+              onValueChange={setIsChecked}
+              color={isChecked ? '#1BB83A' : undefined}
+            />
+            <Text style={styles.robotText}>Iam not a robot</Text>
+          </View>
+          <TouchableOpacity style={styles.resetPassword} onPress={handleSubmit}>
+            <Text style={styles.resetText}>Reset password</Text>
+          </TouchableOpacity>
+
+          {/* footer link */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.footerText}>Don't have an account?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.footerLink}> Signup here</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default ForgotPassword;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#E7EEE6',
+    padding: 20,
+  },
+  card: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 8,
+  },
+  subTitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 18,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginLeft: 4,
+  },
+  inputContainer: {
+    flexDirection: 'column',
+    width: '100%',
+    marginBottom: 10,
+    color: '#000',
+  },
+  label: {
+    fontSize: 14,
+    color: '#000',
+  },
+  inputField: {
+    padding: 14,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    fontSize: 15,
+    borderColor: '#1BB83A',
+    borderWidth: 1,
+    width: '100%',
+  },
+  checkBoxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  checkboxText: {
+    fontSize: 12,
+    color: '#000',
+  },
+  resetPassword: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1BB83A',
+    paddingVertical: 14,
+    borderRadius: 12,
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  resetText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  signupText: {
+    color: '#000',
+  },
+  robotText: {
+    fontSize: 12,
+    color: '#000',
+    marginLeft: 4,
+  },
+  errorrmessage: {
+    color: 'red',
+    marginVertical: 4,
+    textAlign: 'left',
+  },
+});

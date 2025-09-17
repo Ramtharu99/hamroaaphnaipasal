@@ -1,0 +1,272 @@
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  KeyboardAvoidingView, 
+  StyleSheet, 
+  TouchableOpacity, 
+  TextInput, 
+  Image,
+  Platform 
+} from 'react-native';
+import Checkbox from 'expo-checkbox';
+import { useFormik } from 'formik';
+import { passwordChangeValidation } from '../../validation/formvalidation';
+
+// assets
+import back from '../../assets/images/back.png';
+import eye from '../../assets/images/eye.png';
+import eyeOff from '../../assets/images/eye-off.png';
+
+const NewPassword = ({ navigation }) => {
+  const [isChecked, setIsChecked] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const initialValues = {
+    password: '',
+    confirmPass: '',
+  };
+
+  const { values, handleChange, handleSubmit, errors } = useFormik({
+    initialValues,
+    validationSchema: passwordChangeValidation,
+    onSubmit: () => {
+      navigation.navigate('SignIn');
+    },
+  });
+
+  return (
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.card}>
+        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.subtitle}>Enter strong password</Text>
+
+        {/* Back button */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.navigate('SignIn')}
+        >
+          <Image source={back} style={styles.backIcon} />
+          <Text style={styles.backButtonText}>Back to login</Text>
+        </TouchableOpacity>
+
+        {/* New Password */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>New Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              placeholder="••••••••"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry={!showPassword}
+              value={values.password}
+              onChangeText={handleChange('password')}
+              style={styles.inputField}
+            />
+            <TouchableOpacity 
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(prev => !prev)}
+            >
+              <Image
+                source={showPassword ? eye : eyeOff}
+                style={styles.eyeIcon}
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.password && (
+            <Text style={styles.errorMessage}>{errors.password}</Text>
+          )}
+        </View>
+
+        {/* Confirm Password */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              placeholder="••••••••"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry={!showPassword}
+              value={values.confirmPass}
+              onChangeText={handleChange('confirmPass')}
+              style={styles.inputField}
+            />
+            <TouchableOpacity 
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(prev => !prev)}
+            >
+              <Image
+                source={showPassword ? eye : eyeOff}
+                style={styles.eyeIcon}
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.confirmPass && (
+            <Text style={styles.errorMessage}>{errors.confirmPass}</Text>
+          )}
+        </View>
+
+        {/* Checkbox */}
+        <View style={styles.checkboxContainer}>
+          <Checkbox
+            value={isChecked}
+            onValueChange={setIsChecked}
+            color={isChecked ? '#1BB83A' : undefined}
+          />
+          <Text style={styles.rememberText}>I am not a robot</Text>
+        </View>
+
+        {/* Reset Password Button */}
+        <TouchableOpacity style={styles.continueBtn} onPress={handleSubmit}>
+          <Text style={styles.continueText}>Reset Password</Text>
+        </TouchableOpacity>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Don't have an account?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <Text style={styles.signupText}> Signup here</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  );
+};
+
+export default NewPassword;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#E7EEE6',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  card: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 18,
+    textAlign: 'center',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+  },
+  backIcon: {
+    height: 18,
+    width: 18,
+    tintColor: '#6B7280',
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginLeft: 4,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  inputWrapper: {
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 14,
+    color: '#000',
+    marginVertical: 10,
+  },
+  inputField: {
+    padding: 14,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    fontSize: 15,
+    borderColor: '#1BB83A',
+    borderWidth: 1,
+    width: '100%',
+    paddingRight: 40,
+    color: '#000',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+  },
+  eyeIcon: {
+    width: 25,
+    height: 25,
+    tintColor: '#6B7280',
+    resizeMode: 'contain',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    alignSelf: 'flex-start',
+  },
+  rememberText: {
+    fontSize: 12,
+    color: '#000',
+    marginLeft: 8,
+  },
+  continueBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1BB83A',
+    paddingVertical: 14,
+    borderRadius: 12,
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  continueText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  errorMessage: {
+    color: 'red',
+    marginTop: 4,
+    marginBottom: 2,
+    textAlign: 'left',
+    fontSize: 12,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 18,
+    marginBottom: 4,
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  signupText: {
+    textDecorationLine: 'underline',
+    fontSize: 14,
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+});
