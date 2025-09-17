@@ -13,12 +13,13 @@ import {
   StatusBar,
 } from 'react-native';
 
+// Main Tabs
 import DashBoardScreen from './DashBoard';
 import Orders from './OrderList';
 import Analysis from './Analytics';
 import Products from './Products';
 import CategoryList from './topTabNavigator/CategoriesList';
-import Attribute from "./topTabNavigator/Attributes";
+import Attribute from './topTabNavigator/Attributes';
 
 // Settings screens
 import StoreInformation from '../screens/StoreInformation';
@@ -52,7 +53,7 @@ const settingsTabs = [
   'Transactions',
   'Operations',
   'Security',
-  'More',
+  'More Settings',
 ];
 
 const moreOptions = [
@@ -101,17 +102,17 @@ const TabNavigator = ({ navigation }) => {
 
   const scaleY = slideAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 1], 
+    outputRange: [0, 1],
   });
 
   const rotateIcon = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'], 
+    outputRange: ['0deg', '180deg'],
   });
 
   return (
     <>
-    <StatusBar barStyle={"dark-content"} />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -210,10 +211,12 @@ const TabNavigator = ({ navigation }) => {
           setMoreDropdownVisible(false);
         }}
       >
-        <TouchableWithoutFeedback onPress={() => {
-          setModalVisible(false);
-          setMoreDropdownVisible(false);
-        }}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setModalVisible(false);
+            setMoreDropdownVisible(false);
+          }}
+        >
           <View style={styles.overlay} />
         </TouchableWithoutFeedback>
 
@@ -225,18 +228,18 @@ const TabNavigator = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.option}
                 onPress={() => {
-                  if (tab === 'More') {
+                  if (tab === 'More Settings') {
                     toggleMoreDropdown();
                   } else {
                     setModalVisible(false);
                     setMoreDropdownVisible(false);
-                    navigation.navigate(tab);
+                    navigation.navigate(tab === 'More Settings' ? 'MoreSettings' : tab);
                   }
                 }}
               >
                 <View style={styles.optionContainer}>
                   <Text style={styles.optionText}>{tab}</Text>
-                  {tab === 'More' && (
+                  {tab === 'More Settings' && (
                     <Animated.View style={{ transform: [{ rotate: rotateIcon }] }}>
                       <Image
                         source={icons['Dropdown']}
@@ -246,13 +249,13 @@ const TabNavigator = ({ navigation }) => {
                   )}
                 </View>
               </TouchableOpacity>
-              {tab === 'More' && moreDropdownVisible && (
+              {tab === 'More Settings' && moreDropdownVisible && (
                 <Animated.View
                   style={[
                     styles.dropdownContainer,
                     {
                       transform: [{ scaleY }],
-                      opacity: slideAnim, 
+                      opacity: slideAnim,
                     },
                   ]}
                 >
@@ -289,7 +292,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Transactions" component={Transactions} />
       <Stack.Screen name="Operations" component={Operations} />
       <Stack.Screen name="Security" component={Security} />
-      <Stack.Screen name="More" component={MoreSettings} />
+      <Stack.Screen name="MoreSettings" component={MoreSettings} />
       <Stack.Screen name="Customization" component={Customization} />
       <Stack.Screen name="Promotions" component={Promotions} />
       <Stack.Screen name="Tickets" component={Tickets} />
@@ -309,10 +312,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     minHeight: '40%',
   },
-  modalHeader: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 12 
+  modalHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
   },
   option: {
     paddingVertical: 8,
@@ -324,9 +327,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  optionText: { 
-    fontSize: 16, 
-    color: '#333' 
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+    width: 300
   },
   dropdownIcon: {
     width: 16,
@@ -337,9 +341,9 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
-    marginLeft: 24, 
+    marginLeft: 24,
     marginRight: 16,
-    width: '80%', 
+    width: '80%',
     alignSelf: 'flex-end',
     overflow: 'hidden',
   },

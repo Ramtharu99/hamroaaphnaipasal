@@ -67,7 +67,7 @@ const Policies = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F8FA' },
-  goBackButton: { padding: 10, marginBottom: 8 },
+  goBackButton: { padding: 10, width: 100 },
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,

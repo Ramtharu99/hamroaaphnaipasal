@@ -43,9 +43,9 @@ const VerifyOtp = ({ navigation }) => {
     }
   };
 
-  const handleVerify = () => {
-    navigation.navigate('NewPassword');
-  };
+  // const handleVerify = () => {
+  //   navigation.navigate('NewPassword');
+  // };
 
   const resendotp = () => {};
 
@@ -91,7 +91,7 @@ const VerifyOtp = ({ navigation }) => {
 
         {/* footer link */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Didn't receive OTP?</Text>
+          <Text style={styles.footerText}>Didn't receive OTP?{" "}</Text>
           <TouchableOpacity onPress={resendotp}>
             <Text style={styles.footerLink}> Resend</Text>
           </TouchableOpacity>
@@ -126,12 +126,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 8,
+    textAlign: "center"
   },
   subTitle: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 18,
     textAlign: 'center',
+    width: "100%"
   },
   backButton: {
     flexDirection: 'row',

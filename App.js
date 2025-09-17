@@ -8,7 +8,7 @@ import Role from './src/(auth)/Role';
 import SignUp from './src/(auth)/SignUp';
 import SignIn from "./src/(auth)/SignIn";
 import ForgotPassword from "./src/(auth)/ForgotPassword";
-import { StatusBar } from 'react-native';
+import { Platform, StatusBar, View } from 'react-native';
 import VerifyOtp from "./src/(auth)/VerifyOtp";
 import NewPassword from "./src/(auth)/NewPassword";
 
@@ -36,7 +36,12 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <StatusBar barStyle="dark-content" />
+      {Platform.OS === "android" && (
+      <StatusBar barStyle="dark-content" backgroundColor="#1BB83A" translucent={false} />
+      )}
+      {Platform.OS === "ios" && (
+        <View style={{height: 50, backgroundColor:"#1BB83A" }} />
+      )}
       <NavigationScreen />
     </NavigationContainer>
   );

@@ -15,7 +15,7 @@ const DashBoard = () => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
-    }, 2000);
+    }, 1500);
   };
 
   useEffect(() => {

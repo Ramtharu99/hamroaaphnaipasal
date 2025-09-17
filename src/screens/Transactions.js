@@ -44,7 +44,7 @@ const Transactions = ({ navigation }) => {
         {/* Go Back Button */}
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ padding: 10, marginBottom: 20 }}
+          style={{ padding: 10, width: 200 }}
         >
           <Text>
             <Text style={{ fontSize: 25 }}>← </Text>Go Back

@@ -239,7 +239,7 @@ const MarketingAndSocial = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  goBackButton: { padding: 10, marginBottom: 8 },
+  goBackButton: { padding: 10,width: 150 },
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,

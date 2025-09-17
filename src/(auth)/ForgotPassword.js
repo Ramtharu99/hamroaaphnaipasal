@@ -10,7 +10,7 @@ import { useState } from 'react';
 import Checkbox from 'expo-checkbox';
 import { useFormik } from 'formik';
 import { forgotPassValidation } from '../../validation/formvalidation';
-import back from "../../assets/images/back.png"
+import back from '../../assets/images/back.png';
 
 const ForgotPassword = ({ navigation }) => {
   const initialValue = {
@@ -22,8 +22,8 @@ const ForgotPassword = ({ navigation }) => {
   const { values, handleChange, handleSubmit, errors, touched } = useFormik({
     initialValues: initialValue,
     validationSchema: forgotPassValidation,
-    onSubmit: (values) => {
-      navigation.navigate("VerifyOtp", values)
+    onSubmit: values => {
+      navigation.navigate('VerifyOtp', values);
     },
   });
 
@@ -38,7 +38,10 @@ const ForgotPassword = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image source={back} style={{height: 18, width: 18, tintColor: "#6B7280"}} />
+          <Image
+            source={back}
+            style={{ height: 18, width: 18, tintColor: '#6B7280' }}
+          />
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
@@ -69,16 +72,12 @@ const ForgotPassword = ({ navigation }) => {
           </TouchableOpacity>
 
           {/* footer link */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.footerText}>Don't have an account?</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <View style={styles.footerContainer}>
+            <Text style={styles.footerText}>Don't have an account?{" "}</Text>
+            <TouchableOpacity
+              style={{ flexShrink: 1 }}
+              onPress={() => navigation.navigate('SignUp')}
+            >
               <Text style={styles.footerLink}> Signup here</Text>
             </TouchableOpacity>
           </View>
@@ -101,7 +100,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 16,
     padding: 24,
-    alignItems: 'center',
     width: '100%',
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -113,11 +111,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subTitle: {
     fontSize: 14,
     color: '#6B7280',
+    fontWeight: "bold",
     marginBottom: 18,
+    textAlign: 'center',
+    width: "100%"
   },
   backButton: {
     flexDirection: 'row',
@@ -175,10 +177,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  footerText: {
-    fontSize: 14,
-    color: '#374151',
-  },
+  footerContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: 10,
+},
+
+footerText: {
+  fontSize: 14,
+  color: '#374151',
+  flexShrink: 1, 
+},
+
+footerLink: {
+  fontSize: 14,
+  fontWeight: '600',
+  flexShrink: 1,
+  flexWrap: 'wrap',
+  textDecorationLine: "underline"
+},
+
   signupText: {
     color: '#000',
   },

@@ -77,7 +77,7 @@ const StoreInformation = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        style={{ padding: 10 }}
+        style={{ padding: 10 , width: 100}}
       >
         <Text>
           <Text style={{ fontSize: 25 }}>←</Text>Go Back

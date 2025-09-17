@@ -19,7 +19,7 @@ const LoaderScreen = ({ navigation }) => {
 
     anim.start(() => {
       navigation.replace('DashBoard'); 
-      navigation.replace('Role'); 
+      // navigation.replace('Role'); 
 
     });
 

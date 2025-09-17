@@ -21,6 +21,7 @@ import eyeOff from '../../assets/images/eye-off.png';
 const NewPassword = ({ navigation }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const initialValues = {
     password: '',
@@ -87,17 +88,17 @@ const NewPassword = ({ navigation }) => {
             <TextInput
               placeholder="••••••••"
               placeholderTextColor="#9CA3AF"
-              secureTextEntry={!showPassword}
+              secureTextEntry={!showConfirmPassword}
               value={values.confirmPass}
               onChangeText={handleChange('confirmPass')}
               style={styles.inputField}
             />
             <TouchableOpacity 
               style={styles.eyeButton}
-              onPress={() => setShowPassword(prev => !prev)}
+              onPress={() => setShowConfirmPassword(prev => !prev)}
             >
               <Image
-                source={showPassword ? eye : eyeOff}
+                source={showConfirmPassword ? eye : eyeOff}
                 style={styles.eyeIcon}
               />
             </TouchableOpacity>
@@ -124,7 +125,7 @@ const NewPassword = ({ navigation }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
+          <Text style={styles.footerText}>Don't have an account?{" "}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.signupText}> Signup here</Text>
           </TouchableOpacity>
@@ -166,6 +167,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: 18,
     textAlign: 'center',
+    width: "100%"
   },
   backButton: {
     flexDirection: 'row',
@@ -182,6 +184,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginLeft: 4,
+    width: 100
   },
   inputContainer: {
     width: '100%',

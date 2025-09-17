@@ -82,7 +82,7 @@ const SignUp = ({ navigation }) => {
           <View style={styles.inputWrapper}>
             <TextInput
               placeholder="**********"
-              style={styles.inputField}
+              style={[styles.inputField, {color: "#000"}]}
               secureTextEntry={!showPassword}
               value={values.password}
               placeholderTextColor={"gray"}
@@ -158,7 +158,7 @@ const SignUp = ({ navigation }) => {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Text style={styles.signupText}>Sign in here</Text>
+            <Text style={styles.signupText}>SignIn here</Text>
           </TouchableOpacity>
         </View>
       </View>

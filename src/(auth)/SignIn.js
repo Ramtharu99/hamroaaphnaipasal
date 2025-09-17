@@ -102,6 +102,7 @@ const SignIn = ({ navigation }) => {
                 value={isChecked}
                 onValueChange={setIsChecked}
                 color={isChecked ? '#1BB83A' : undefined}
+                style={{height: 20, width: 20}}
               />
               <Text style={styles.rememberText}>Remember me</Text>
             </View>
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
   rememberText: {
     fontSize: 12,
     color: '#000',
-    marginLeft: 8,
+    marginLeft: 8
   },
   forgotText: {
     fontSize: 12,

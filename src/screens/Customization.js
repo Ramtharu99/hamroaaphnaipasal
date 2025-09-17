@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 10,
+    width: 150
   },
   backButtonText: {
     fontSize: 16,
