@@ -36,10 +36,10 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      {Platform.OS === "android" && (
+      {Platform.OS == "android" && (
       <StatusBar barStyle="dark-content" backgroundColor="#1BB83A" translucent={false} />
       )}
-      {Platform.OS === "ios" && (
+      {Platform.OS == "ios" && (
         <View style={{height: 50, backgroundColor:"#1BB83A" }} />
       )}
       <NavigationScreen />

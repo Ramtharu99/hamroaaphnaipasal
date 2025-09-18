@@ -1,25 +1,24 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Image,
-  Text,
-  TouchableOpacity,
   View,
-  Modal,
+  Text,
+  Image,
+  TouchableOpacity,
   StyleSheet,
-  TouchableWithoutFeedback,
   Animated,
   StatusBar,
+  BackHandler,
+  Alert,
 } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 // Main Tabs
 import DashBoardScreen from './DashBoard';
 import Orders from './OrderList';
 import Analysis from './Analytics';
 import Products from './Products';
-import CategoryList from './topTabNavigator/CategoriesList';
-import Attribute from './topTabNavigator/Attributes';
 
 // Settings screens
 import StoreInformation from '../screens/StoreInformation';
@@ -33,9 +32,11 @@ import Customization from '../screens/Customization';
 import Promotions from '../screens/Promotions';
 import Tickets from '../screens/Tickets';
 import ManageStaff from '../screens/ManageStaff';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const TopTab = createMaterialTopTabNavigator();
 
 const icons = {
   DashBoard: require('../../assets/images/home.png'),
@@ -46,28 +47,27 @@ const icons = {
   Dropdown: require('../../assets/images/dropdown.png'),
 };
 
-const settingsTabs = [
-  'Store Information',
-  'Policies',
-  'Marketing & Social',
-  'Transactions',
-  'Operations',
-  'Security',
-  'More Settings',
-];
+// Settings Top Tabs
+const SettingsTabs = ({ navigation }) => {
+  return (
+    <TopTab.Navigator
+      screenOptions={{
+        tabBarLabelStyle: { fontSize: 12 },
+        tabBarStyle: { backgroundColor: '#fff' },
+        tabBarIndicatorStyle: { backgroundColor: '#1BB83A' },
+      }}
+    >
+      <TopTab.Screen name="Attributes" component={StoreInformation} />
+      <TopTab.Screen name="Category" component={Policies} />
+    </TopTab.Navigator>
+  );
+};
 
-const moreOptions = [
-  'Customization',
-  'Promotions',
-  'Tickets',
-  'Manage Staff',
-];
-
-const TabNavigator = ({ navigation }) => {
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [moreDropdownVisible, setMoreDropdownVisible] = React.useState(false);
-  const slideAnim = React.useRef(new Animated.Value(0)).current;
-  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+// Settings Stack Navigator
+const SettingsStack = () => {
+  const [moreDropdownVisible, setMoreDropdownVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
   const toggleMoreDropdown = () => {
     if (moreDropdownVisible) {
@@ -104,11 +104,115 @@ const TabNavigator = ({ navigation }) => {
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
-
   const rotateIcon = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '180deg'],
   });
+
+  const settingsTabs = [
+    'Store Information',
+    'Policies',
+    'Marketing & Social',
+    'Transactions',
+    'Operations',
+    'Security',
+    'More Settings',
+  ];
+
+  const moreOptions = ['Customization', 'Promotions', 'Tickets', 'Manage Staff'];
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SettingsHome" component={({ navigation }) => (
+        <SafeAreaView style={styles.modalContent}>
+          <Text style={styles.modalHeader}>⚙️ Settings</Text>
+          {settingsTabs.map(tab => (
+            <View key={tab}>
+              <TouchableOpacity
+                style={styles.option}
+                onPress={() => {
+                  if (tab === 'More Settings') toggleMoreDropdown();
+                  else if (tab === 'Attributes' || tab === 'Category')
+                    navigation.navigate('SettingsTabs');
+                  else navigation.navigate(tab);
+                }}
+              >
+                <View style={styles.optionContainer}>
+                  <Text style={styles.optionText}>{tab}</Text>
+                  {tab === 'More Settings' && (
+                    <Animated.View
+                      style={{ transform: [{ rotate: rotateIcon }] }}
+                    >
+                      <Image
+                        source={icons['Dropdown']}
+                        style={styles.dropdownIcon}
+                      />
+                    </Animated.View>
+                  )}
+                </View>
+              </TouchableOpacity>
+
+              {tab === 'More Settings' && moreDropdownVisible && (
+                <Animated.View
+                  style={[
+                    styles.dropdownContainer,
+                    { transform: [{ scaleY }], opacity: slideAnim },
+                  ]}
+                >
+                  {moreOptions.map(option => (
+                    <TouchableOpacity
+                      key={option}
+                      style={styles.dropdownOption}
+                      onPress={() => {
+                        setMoreDropdownVisible(false);
+                        navigation.navigate(option);
+                      }}
+                    >
+                      <Text style={styles.dropdownOptionText}>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </Animated.View>
+              )}
+            </View>
+          ))}
+        </SafeAreaView>
+      )} />
+      <Stack.Screen name="SettingsTabs" component={SettingsTabs} />
+      <Stack.Screen name="Store Information" component={StoreInformation} />
+      <Stack.Screen name="Policies" component={Policies} />
+      <Stack.Screen name="Marketing & Social" component={MarketingAndSocial} />
+      <Stack.Screen name="Transactions" component={Transactions} />
+      <Stack.Screen name="Operations" component={Operations} />
+      <Stack.Screen name="Security" component={Security} />
+      <Stack.Screen name="More Settings" component={MoreSettings} />
+      <Stack.Screen name="Customization" component={Customization} />
+      <Stack.Screen name="Promotions" component={Promotions} />
+      <Stack.Screen name="Tickets" component={Tickets} />
+      <Stack.Screen name="Manage Staff" component={ManageStaff} />
+    </Stack.Navigator>
+  );
+};
+
+const TabNavigator = ({ navigation }) => {
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Yes', onPress: () => BackHandler.exitApp() },
+        ],
+        { cancelable: true },
+      );
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <>
@@ -176,147 +280,25 @@ const TabNavigator = ({ navigation }) => {
         <Tab.Screen name="Orders" component={Orders} />
         <Tab.Screen name="Products" component={Products} />
         <Tab.Screen name="Analytics" component={Analysis} />
-        <Tab.Screen
-          name="Setting"
-          component={DashBoardScreen}
-          options={{
-            tabBarButton: props => (
-              <TouchableOpacity
-                {...props}
-                onPress={() => setModalVisible(true)}
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Image
-                  source={icons['Setting']}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Text style={{ fontSize: 12 }}>Setting</Text>
-              </TouchableOpacity>
-            ),
-          }}
-        />
+        <Tab.Screen name="Setting" component={SettingsStack} />
       </Tab.Navigator>
-
-      {/* Drop-Up Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => {
-          setModalVisible(false);
-          setMoreDropdownVisible(false);
-        }}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setModalVisible(false);
-            setMoreDropdownVisible(false);
-          }}
-        >
-          <View style={styles.overlay} />
-        </TouchableWithoutFeedback>
-
-        <View style={styles.modalContent}>
-          <Text style={styles.modalHeader}>⚙️ Settings</Text>
-
-          {settingsTabs.map(tab => (
-            <View key={tab}>
-              <TouchableOpacity
-                style={styles.option}
-                onPress={() => {
-                  if (tab === 'More Settings') {
-                    toggleMoreDropdown();
-                  } else {
-                    setModalVisible(false);
-                    setMoreDropdownVisible(false);
-                    navigation.navigate(tab === 'More Settings' ? 'MoreSettings' : tab);
-                  }
-                }}
-              >
-                <View style={styles.optionContainer}>
-                  <Text style={styles.optionText}>{tab}</Text>
-                  {tab === 'More Settings' && (
-                    <Animated.View style={{ transform: [{ rotate: rotateIcon }] }}>
-                      <Image
-                        source={icons['Dropdown']}
-                        style={styles.dropdownIcon}
-                      />
-                    </Animated.View>
-                  )}
-                </View>
-              </TouchableOpacity>
-              {tab === 'More Settings' && moreDropdownVisible && (
-                <Animated.View
-                  style={[
-                    styles.dropdownContainer,
-                    {
-                      transform: [{ scaleY }],
-                      opacity: slideAnim,
-                    },
-                  ]}
-                >
-                  {moreOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={styles.dropdownOption}
-                      onPress={() => {
-                        setModalVisible(false);
-                        setMoreDropdownVisible(false);
-                        navigation.navigate(option);
-                      }}
-                    >
-                      <Text style={styles.dropdownOptionText}>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </Animated.View>
-              )}
-            </View>
-          ))}
-        </View>
-      </Modal>
     </>
   );
 };
 
-const AppNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Tabs" component={TabNavigator} />
-      <Stack.Screen name="Store Information" component={StoreInformation} />
-      <Stack.Screen name="Policies" component={Policies} />
-      <Stack.Screen name="Marketing & Social" component={MarketingAndSocial} />
-      <Stack.Screen name="Transactions" component={Transactions} />
-      <Stack.Screen name="Operations" component={Operations} />
-      <Stack.Screen name="Security" component={Security} />
-      <Stack.Screen name="MoreSettings" component={MoreSettings} />
-      <Stack.Screen name="Customization" component={Customization} />
-      <Stack.Screen name="Promotions" component={Promotions} />
-      <Stack.Screen name="Tickets" component={Tickets} />
-      <Stack.Screen name="Manage Staff" component={ManageStaff} />
-      <Stack.Screen name="Category" component={CategoryList} />
-      <Stack.Screen name="Attribute" component={Attribute} />
-    </Stack.Navigator>
-  );
-};
+const AppNavigator = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Tabs" component={TabNavigator} />
+  </Stack.Navigator>
+);
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#E7EEE6',
     padding: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    minHeight: '40%',
+    flex: 1,
   },
-  modalHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
+  modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
   option: {
     paddingVertical: 8,
     borderBottomWidth: 1,
@@ -327,11 +309,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  optionText: {
-    fontSize: 16,
-    color: '#333',
-    width: 300
-  },
+  optionText: { fontSize: 16, color: '#333', width: 300 },
   dropdownIcon: {
     width: 16,
     height: 16,
@@ -339,11 +317,11 @@ const styles = StyleSheet.create({
     tintColor: '#333',
   },
   dropdownContainer: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#E7EEE6',
     borderRadius: 8,
     marginLeft: 24,
     marginRight: 16,
-    width: '80%',
+    width: '100%',
     alignSelf: 'flex-end',
     overflow: 'hidden',
   },
@@ -362,11 +340,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  dropdownOptionText: {
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
-  },
+  dropdownOptionText: { fontSize: 14, color: '#333', textAlign: 'center' },
 });
 
 export default AppNavigator;

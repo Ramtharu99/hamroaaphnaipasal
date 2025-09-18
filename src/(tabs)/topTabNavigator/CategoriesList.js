@@ -2,18 +2,30 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   TextInput,
   FlatList,
   StyleSheet,
-  ScrollView,
   Modal,
   RefreshControl,
+  Pressable,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
 
-const CategoryList = ({ navigation }) => {
+const toastConfig = {
+  success: props => (
+    <BaseToast
+      {...props}
+      style={styles.toast}
+      contentContainerStyle={styles.toastContainer}
+      text1Style={styles.toastText1}
+      text2Style={styles.toastText2}
+    />
+  ),
+};
+
+const CategoryList = () => {
   const [categories, setCategories] = useState([
     {
       id: '1',
@@ -40,6 +52,7 @@ const CategoryList = ({ navigation }) => {
       updatedAt: '4/21/2025',
     },
   ]);
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filterText, setFilterText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -49,12 +62,22 @@ const CategoryList = ({ navigation }) => {
   const [categoryStatus, setCategoryStatus] = useState('Active');
   const [refreshing, setRefreshing] = useState(false);
 
+  const columnWidths = {
+    id: 50,
+    name: 150,
+    description: 250,
+    status: 100,
+    createdAt: 120,
+    updatedAt: 120,
+    actions: 150,
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
       setCategories(prev => [...prev]);
       setRefreshing(false);
-    }, 1500);
+    }, 1000);
   };
 
   const showToast = message => {
@@ -65,16 +88,6 @@ const CategoryList = ({ navigation }) => {
       visibilityTime: 2000,
       autoHide: true,
     });
-  };
-
-  const customToast = props => {
-    <BaseToast
-      {...props}
-      style={styles.Toast}
-      contentContainerStyle={styles.toastContainer}
-      text1={styles.toastText1}
-      text2={styles.toastText2}
-    />;
   };
 
   const openAddCategoryModal = () => {
@@ -94,8 +107,11 @@ const CategoryList = ({ navigation }) => {
   };
 
   const saveCategory = () => {
+    if (!categoryName.trim()) {
+      showToast('Category name is required!');
+      return;
+    }
     if (editCategory) {
-      // edit
       setCategories(prev =>
         prev.map(cat =>
           cat.id === editCategory.id
@@ -104,13 +120,13 @@ const CategoryList = ({ navigation }) => {
                 name: categoryName,
                 description: categoryDescription,
                 status: categoryStatus,
+                updatedAt: new Date().toLocaleDateString(),
               }
             : cat,
         ),
       );
-      showToast("Category updated successfully!")
+      showToast('Category updated successfully!');
     } else {
-      // add new
       const newCategory = {
         id: (categories.length + 1).toString(),
         name: categoryName,
@@ -120,405 +136,380 @@ const CategoryList = ({ navigation }) => {
         updatedAt: new Date().toLocaleDateString(),
       };
       setCategories(prev => [...prev, newCategory]);
-      showToast("Product addes successfully!")
+      showToast('Category added successfully!');
     }
-
     setModalVisible(false);
   };
 
-  const handleDeleteCategory = () => {
-    if (selectedCategory) {
-      setCategories(prev => prev.filter(cat => cat.id !== selectedCategory.id));
-      setSelectedCategory(null);
-      showToast("Category deleted successfully!")
-    }
-  };
-
-  const deleteSeprateCategory = id => {
+  const deleteCategory = id => {
     setCategories(prev => prev.filter(cat => cat.id !== id));
-    setSelectedCategory(null);
-    showToast("Category deleted successfully")
+    if (selectedCategory?.id === id) setSelectedCategory(null);
+    showToast('Category deleted successfully!');
   };
 
   const renderCategoryItem = ({ item }) => (
-    <View style={styles.categoryRow}>
-      <TouchableOpacity
-        style={styles.checkbox}
-        onPress={() =>
-          setSelectedCategory(item.id === selectedCategory?.id ? null : item)
-        }
-      >
-        <Text>{item.id === selectedCategory?.id ? '✓' : ''}</Text>
-      </TouchableOpacity>
-      <Text style={[styles.categoryText, { width: 140 }]}>{item.name}</Text>
-      <Text style={[styles.categoryText, { width: 200 }]}>
+    <Pressable
+      style={[
+        styles.categoryRow,
+        item.id === selectedCategory?.id && styles.selectedRow,
+      ]}
+      onPress={() =>
+        setSelectedCategory(item.id === selectedCategory?.id ? null : item)
+      }
+    >
+      <Text style={[styles.categoryCell, { width: columnWidths.id }]}>
+        {item.id}
+      </Text>
+      <Text style={[styles.categoryCell, { width: columnWidths.name }]}>
+        {item.name}
+      </Text>
+      <Text style={[styles.categoryCell, { width: columnWidths.description }]}>
         {item.description}
       </Text>
       <Text
         style={[
           styles.statusText,
           {
-            width: 90,
+            width: columnWidths.status,
             backgroundColor: item.status === 'Active' ? '#10B981' : '#EF4444',
           },
         ]}
       >
         {item.status}
       </Text>
-      <Text style={[styles.categoryText, { width: 120 }]}>
+      <Text style={[styles.categoryCell, { width: columnWidths.createdAt }]}>
         {item.createdAt}
       </Text>
-      <Text style={[styles.categoryText, { width: 120 }]}>
+      <Text style={[styles.categoryCell, { width: columnWidths.updatedAt }]}>
         {item.updatedAt}
       </Text>
-      <View style={[styles.actions, { width: 70 }]}>
-        <TouchableOpacity
-          style={styles.editButton}
+      <View style={[styles.actions, { width: columnWidths.actions }]}>
+        <Pressable
+          style={styles.editBtn}
           onPress={() => openEditCategoryModal(item)}
         >
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteSeprateCategory(item.id)}
+          <Text style={styles.editText}>Edit</Text>
+        </Pressable>
+        <Pressable
+          style={styles.deleteBtn}
+          onPress={() => deleteCategory(item.id)}
         >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+          <Text style={styles.deleteText}>Delete</Text>
+        </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 12, backgroundColor: '#F9FAFB' }}>
-      <View style={styles.categoryHeader}>
-        <Text style={styles.headerTitle}>Product Categories</Text>
-        <View style={{ flexDirection: 'row', gap: 5 }}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={openAddCategoryModal}
-          >
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Product Categories</Text>
+        <View style={styles.headerButtons}>
+          <Pressable style={styles.addButton} onPress={openAddCategoryModal}>
             <Text style={styles.addButtonText}>+ Add New</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[
-              styles.deleteButton,
-              !selectedCategory && { backgroundColor: '#EF4444', opacity: 0.5 },
+              styles.deleteBtn,
+              !selectedCategory && styles.disabledButton,
             ]}
             onPress={() =>
-              selectedCategory && handleDeleteCategory(selectedCategory.id)
+              selectedCategory && deleteCategory(selectedCategory.id)
             }
             disabled={!selectedCategory}
           >
-            <Text style={styles.addButtonText}>Delete</Text>
-          </TouchableOpacity>
+            <Text style={styles.deleteText}>Delete</Text>
+          </Pressable>
         </View>
       </View>
 
       <TextInput
         style={styles.searchInput}
         placeholder="Search categories..."
+        placeholderTextColor="#9CA3AF"
         value={filterText}
         onChangeText={setFilterText}
-        placeholderTextColor="#6B7280"
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View>
-          <FlatList
-            data={categories.filter(cat =>
-              cat.name.toLowerCase().includes(filterText.toLowerCase()),
-            )}
-            renderItem={renderCategoryItem}
-            keyExtractor={item => item.id}
-            ListHeaderComponent={
-              <View style={styles.tableHeader}>
-                <Text style={[styles.headerText, { width: 60 }]}>#</Text>
-                <Text style={[styles.headerText, { width: 140 }]}>
-                  Category
-                </Text>
-                <Text style={[styles.headerText, { width: 200 }]}>
-                  Description
-                </Text>
-                <Text style={[styles.headerText, { width: 90 }]}>Status</Text>
-                <Text style={[styles.headerText, { width: 120 }]}>
-                  Created At
-                </Text>
-                <Text style={[styles.headerText, { width: 120 }]}>
-                  Updated At
-                </Text>
-                <Text style={[styles.headerText, { width: 70 }]}>Actions</Text>
-              </View>
-            }
-            ListFooterComponent={
-              <Text style={styles.pagination}>
-                Showing 1 to {categories.length} of {categories.length}
-                categories
+
+      <ScrollView horizontal showsHorizontalScrollIndicator>
+        <FlatList
+          data={categories.filter(cat =>
+            cat.name.toLowerCase().includes(filterText.toLowerCase()),
+          )}
+          renderItem={renderCategoryItem}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <View style={styles.tableHeader}>
+              <Text style={[styles.headerCell, { width: columnWidths.id }]}>
+                #
               </Text>
-            }
-          />
-        </View>
-        <Modal transparent={true} visible={modalVisible} animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                {editCategory ? 'Edit Category' : 'Add Category'}
+              <Text style={[styles.headerCell, { width: columnWidths.name }]}>
+                Category
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Category Name"
-                value={categoryName}
-                onChangeText={setCategoryName}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Category Description"
-                value={categoryDescription}
-                onChangeText={setCategoryDescription}
-              />
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginTop: 10,
-                }}
+              <Text
+                style={[styles.headerCell, { width: columnWidths.description }]}
               >
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={saveCategory}
+                Description
+              </Text>
+              <Text style={[styles.headerCell, { width: columnWidths.status }]}>
+                Status
+              </Text>
+              <Text
+                style={[styles.headerCell, { width: columnWidths.createdAt }]}
+              >
+                Created
+              </Text>
+              <Text
+                style={[styles.headerCell, { width: columnWidths.updatedAt }]}
+              >
+                Updated
+              </Text>
+              <Text
+                style={[styles.headerCell, { width: columnWidths.actions }]}
+              >
+                Actions
+              </Text>
+            </View>
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={styles.flatListContent}
+        />
+      </ScrollView>
+
+      {/* Modal for Add/Edit */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {editCategory ? 'Edit Category' : 'Add Category'}
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Category Name"
+              value={categoryName}
+              onChangeText={setCategoryName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Category Description"
+              value={categoryDescription}
+              onChangeText={setCategoryDescription}
+              multiline
+              numberOfLines={3}
+            />
+            <View style={styles.statusToggleContainer}>
+              {['Active', 'Inactive'].map(status => (
+                <Pressable
+                  key={status}
+                  style={[
+                    styles.statusBtn,
+                    categoryStatus === status && {
+                      backgroundColor:
+                        status === 'Active' ? '#10B981' : '#EF4444',
+                    },
+                  ]}
+                  onPress={() => setCategoryStatus(status)}
                 >
-                  <Text style={styles.buttonText}>Save</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
+                  <Text
+                    style={[
+                      styles.statusBtnText,
+                      categoryStatus === status && styles.statusBtnTextActive,
+                    ]}
+                  >
+                    {status}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.modalBtns}>
+              <Pressable style={styles.saveBtn} onPress={saveCategory}>
+                <Text style={styles.btnText}>Save</Text>
+              </Pressable>
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.btnText}>Cancel</Text>
+              </Pressable>
             </View>
           </View>
-        </Modal>
-      </ScrollView>
-      <Toast config={{ success: customToast }} />
+        </View>
+      </Modal>
+
+      <Toast config={toastConfig} />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  categoryHeader: {
+  container: { flex: 1, backgroundColor: '#F9FAFB', paddingHorizontal: 16 },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  backButton: {
-    padding: 10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1F2937',
-  },
+  title: { fontSize: 24, fontWeight: '700', color: '#1F2937' },
+  headerButtons: { flexDirection: 'row', gap: 8 },
   addButton: {
     backgroundColor: '#10B981',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
-    marginLeft: 8,
   },
-  deleteButton: {
+  addButtonText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
+  deleteBtn: {
     backgroundColor: '#EF4444',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
-  addButtonText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
+  disabledButton: { opacity: 0.5 },
+  deleteText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
   searchInput: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: '#FFF',
-    fontSize: 14,
+    padding: 12,
+    fontSize: 16,
+    color: '#1F2937',
+    marginBottom: 8,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#E0E7FF',
-    padding: 10,
+    padding: 12,
     borderRadius: 10,
-    marginBottom: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    marginBottom: 8,
   },
-  headerText: {
+  headerCell: {
     fontWeight: '700',
-    color: '#1F2937',
     fontSize: 14,
+    color: '#1F2937',
+    textAlign: 'left',
+    marginRight: 12,
   },
+  flatListContent: { paddingBottom: 16 },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 5,
     marginBottom: 8,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
   },
   selectedRow: {
     borderWidth: 1,
     borderColor: '#3B82F6',
+    backgroundColor: '#EFF6FF',
   },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  categoryText: {
+  categoryCell: {
     fontSize: 14,
     color: '#374151',
+    textAlign: 'left',
+    marginRight: 12,
   },
   statusText: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 12,
-    color: '#FFF',
-    textAlign: 'center',
     fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: 12,
   },
-  actions: {
-    flexDirection: 'row',
-  },
-  actionButton: {
-    padding: 6,
-    backgroundColor: '#F3F4F6',
+  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
+  editBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  actionText: {
-    color: '#1F2937',
-    fontWeight: '700',
-  },
+  editText: { color: '#1F2937', fontSize: 12, fontWeight: '600' },
   pagination: {
     textAlign: 'center',
     marginTop: 12,
     color: '#6B7280',
-    fontSize: 12,
-  },
-  editButton: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: 'gray',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    marginRight: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  editButtonText: {
-    color: '#000',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  deleteButton: {
-    backgroundColor: '#EF4444',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 14,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
     alignItems: 'center',
-    // justifyContent: "center",
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     padding: 20,
-    width: '85%',
+    width: '90%',
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
+    color: '#1F2937',
     textAlign: 'center',
-    marginBottom: 15,
-    color: '#111827',
+    marginBottom: 16,
   },
   input: {
     backgroundColor: '#F3F4F6',
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: 8,
     padding: 12,
+    fontSize: 16,
+    color: '#1F2937',
     marginBottom: 12,
-    fontSize: 14,
-    color: '#111827',
   },
-  saveButton: {
+  statusToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 4,
+  },
+  statusBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  statusBtnText: { fontWeight: '600', fontSize: 14, color: '#1F2937' },
+  statusBtnTextActive: { color: '#FFFFFF' },
+  modalBtns: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  saveBtn: {
     backgroundColor: '#10B981',
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    marginRight: 8,
     alignItems: 'center',
   },
-  cancelButton: {
+  cancelBtn: {
     backgroundColor: '#EF4444',
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    marginLeft: 8,
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  toastContent: {
-    paddingHorizontal: 15,
-  },
-  toastText1: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFF',
-  },
-  toastText2: {
-    fontSize: 14,
-    color: '#FFF',
-  },
+  btnText: { color: '#FFFFFF', fontWeight: '600', fontSize: 16 },
+  toast: { backgroundColor: '#10B981', borderRadius: 8, padding: 12 },
+  toastContainer: { paddingHorizontal: 12 },
+  toastText1: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+  toastText2: { fontSize: 14, color: '#FFFFFF' },
 });
 
 export default CategoryList;
