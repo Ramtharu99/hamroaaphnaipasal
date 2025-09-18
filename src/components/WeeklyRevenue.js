@@ -1,99 +1,100 @@
-import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Animated,
-} from "react-native";
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, BackHandler } from 'react-native';
 
-const chartHeight = 200;
+const WeeklyRevenuePie = ({ navigation }) => {
+  const weeklyRevenueData = [
+    { day: 'Mon', value: 2500, color: '#f87171' },
+    { day: 'Tue', value: 1000, color: '#34d399' },
+    { day: 'Wed', value: 1000, color: '#60a5fa' },
+    { day: 'Thu', value: 400, color: '#fbbf24' },
+    { day: 'Fri', value: 500, color: '#a78bfa' },
+    { day: 'Sat', value: 450, color: '#f472b6' },
+    { day: 'Sun', value: 4800, color: '#facc15' },
+  ];
 
-const WeeklyRevenue = () => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const totalValue = weeklyRevenueData.reduce(
+    (acc, item) => acc + item.value,
+    0,
+  );
 
-  const weeklyRevenueData = [2500, 1000, 1000, 400, 500, 450, 4800];
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const maxValue = Math.max(...weeklyRevenueData);
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1200,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
+  
 
   return (
-    <View style={styles.chartContainer}>
-      <Text style={styles.title}>Weekly Revenue</Text>
-      <Text style={styles.subtitle}>
-        Revenue breakdown by day of the week
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Weekly Revenue Pie Chart</Text>
+      <Text style={styles.subtitle}>Revenue distribution per day</Text>
 
-      <View style={styles.chart}>
-        {weeklyRevenueData.map((value, index) => {
-          const barHeight = (value / maxValue) * chartHeight;
+      {/* Pie chart as a donut */}
+      <View style={styles.pieWrapper}>
+        {weeklyRevenueData.map((item, index) => {
+          const angle = (item.value / totalValue) * 360;
           return (
-            <View key={index} style={styles.barWrapper}>
-              <Animated.View
-                style={[
-                  styles.bar,
-                  {
-                    height: barHeight,
-                    transform: [{ scaleY: fadeAnim }],
-                  },
-                ]}
-              />
-              <Text style={styles.label}>{labels[index]}</Text>
-            </View>
+            <View
+              key={index}
+              style={[
+                styles.pieSlice,
+                {
+                  backgroundColor: item.color,
+                  transform: [{ rotate: `${angle * index}deg` }],
+                },
+              ]}
+            />
           );
         })}
+        <View style={styles.pieCenter} />
+      </View>
+
+      {/* Labels */}
+      <View style={styles.labelsContainer}>
+        {weeklyRevenueData.map((item, index) => (
+          <View key={index} style={styles.labelRow}>
+            <View style={[styles.colorBox, { backgroundColor: item.color }]} />
+            <Text style={styles.labelText}>
+              {item.day}: {item.value}
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  chartContainer: {
-    marginVertical: 20,
-    backgroundColor: "#E7EEE6",
+  container: { flex: 1, backgroundColor: '#F3F4F6', padding: 20 },
+  title: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 4 },
+  subtitle: { fontSize: 12, color: '#666', marginBottom: 20 },
+
+  pieWrapper: {
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
+  pieSlice: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    borderRadius: 125,
   },
-  subtitle: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 10,
+  pieCenter: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F3F4F6',
+    position: 'absolute',
   },
-  chart: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    height: chartHeight,
-    width: "100%",
-    alignSelf: "center",
+
+  labelsContainer: {
+    marginTop: 10,
   },
-  barWrapper: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-    flex: 1,
-    marginHorizontal: 2,
-  },
-  bar: {
-    width: 20,
-    backgroundColor: "rgba(0,128,0,0.7)",
-    borderRadius: 6,
-  },
-  label: {
-    marginTop: 5,
-    fontSize: 10,
-    color: "#666",
-  },
+  labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  colorBox: { width: 16, height: 16, marginRight: 6, borderRadius: 4 },
+  labelText: { fontSize: 14, color: '#111827' },
 });
 
-export default WeeklyRevenue;
+export default WeeklyRevenuePie;

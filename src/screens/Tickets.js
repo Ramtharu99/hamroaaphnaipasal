@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   Pressable,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
@@ -69,6 +70,16 @@ const Tickets = ({ navigation }) => {
       setTickets(data);
     };
     fetchTickets();
+
+    const backAction = () => {
+      if(navigation.canGoBack()){
+        navigation.goBack()
+        return true
+      }
+      return false
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
+    return () => backHandler.remove()
   }, []);
 
   const filteredTickets = tickets.filter(ticket =>

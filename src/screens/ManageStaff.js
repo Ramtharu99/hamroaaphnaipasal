@@ -56,11 +56,11 @@ const ManageStaff = ({ navigation }) => {
 
     // Android back button handling
     const backAction = () => {
-      Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'YES', onPress: () => BackHandler.exitApp() },
-      ]);
-      return true;
+      if(navigation.canGoBack()){
+        navigation.goBack()
+        return true;
+      }
+      return false
     };
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -68,7 +68,7 @@ const ManageStaff = ({ navigation }) => {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const filteredStaff = staffList.filter(staff =>
     staff.name.toLowerCase().includes(filterText.toLowerCase()),

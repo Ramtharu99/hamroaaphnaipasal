@@ -89,7 +89,7 @@ const DashBoard = () => {
         </View>
 
         {/* Product Component */}
-        <View style={{ marginTop: 16 }}>
+        <View>
           <Product />
         </View>
       </ScrollView>

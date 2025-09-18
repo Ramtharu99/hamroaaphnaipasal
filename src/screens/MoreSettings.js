@@ -1,10 +1,22 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const moreOptions = ['Customization', 'Promotions', 'Tickets', 'Manage Staff'];
 
 const MoreSettings = ({ navigation }) => {
+
+  useEffect(() => {
+    const backAction = () => {
+      if(navigation.canGoBack()){
+        navigation.goBack()
+        return true
+      }
+      return false
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
+    return () => backHandler.remove()
+  }, [navigation])
 
   
   const handleOptionPress = (option) => {

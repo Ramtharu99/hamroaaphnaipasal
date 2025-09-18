@@ -1,12 +1,24 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Animated,
+  ScrollView,
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
-const chartHeight = 200;
-const chartWidth = width - 40;
+const chartHeight = 220;
+const barWidth = 30;
 
 const SalesOverview = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const animatedValues = useRef(
+    Array(12)
+      .fill(0)
+      .map(() => new Animated.Value(0)),
+  ).current;
 
   const monthlySalesData = [
     4000, 3000, 5000, 4500, 4000, 6000, 5500, 6500, 7000, 7500, 8000, 8500,
@@ -15,10 +27,20 @@ const SalesOverview = () => {
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1200,
+      duration: 800,
       useNativeDriver: true,
     }).start();
-  }, [fadeAnim]);
+
+    // Animate bars sequentially
+    animatedValues.forEach((anim, index) => {
+      Animated.timing(anim, {
+        toValue: monthlySalesData[index],
+        duration: 800,
+        delay: index * 100,
+        useNativeDriver: false,
+      }).start();
+    });
+  }, []);
 
   const maxValue = Math.max(...monthlySalesData);
 
@@ -29,101 +51,107 @@ const SalesOverview = () => {
         Monthly sales performance showing growth trends
       </Text>
 
-      <View style={styles.chart}>
-        {monthlySalesData.map((value, index) => {
-          const barHeight = (value / maxValue) * chartHeight;
-          return (
-            <Animated.View
-              key={index}
-              style={[
-                styles.bar,
-                {
-                  height: barHeight,
-                  transform: [
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.chart}>
+          {monthlySalesData.map((value, index) => {
+            const barHeight = (value / maxValue) * chartHeight;
+            return (
+              <View key={index} style={styles.barWrapper}>
+                <Animated.View
+                  style={[
+                    styles.bar,
                     {
-                      scaleY: fadeAnim,
+                      height: animatedValues[index].interpolate({
+                        inputRange: [0, maxValue],
+                        outputRange: [0, barHeight],
+                      }),
                     },
-                  ],
-                },
-              ]}
-            >
-              <Text style={styles.barLabel}>${value / 1000}k</Text>
-            </Animated.View>
-          );
-        })}
-      </View>
-
-      <View style={styles.labels}>
-        {[
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ].map((label, index) => (
-          <Text key={index} style={styles.labelText}>
-            {label}
-          </Text>
-        ))}
-      </View>
+                  ]}
+                >
+                  <Text style={styles.barLabel}>
+                    ${(value / 1000).toFixed(1)}k
+                  </Text>
+                </Animated.View>
+                <Text style={styles.barMonth}>
+                  {
+                    [
+                      'Jan',
+                      'Feb',
+                      'Mar',
+                      'Apr',
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec',
+                    ][index]
+                  }
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
     </Animated.View>
   );
 };
 
 export default SalesOverview;
 
-
 const styles = StyleSheet.create({
   chartContainer: {
     marginVertical: 20,
-    backgroundColor: '#E7EEE6',
-    padding: 10
+    backgroundColor: '#F0FDF4',
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#065F46',
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 10,
+    fontSize: 13,
+    color: '#10B981',
+    marginBottom: 16,
   },
   chart: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     height: chartHeight,
-    justifyContent: 'space-between',
-    marginBottom: 10,
+    paddingBottom: 20,
+  },
+  barWrapper: {
+    width: barWidth,
+    alignItems: 'center',
+    marginHorizontal: 8,
   },
   bar: {
-    width: chartWidth / 15,
-    backgroundColor: 'rgba(0,128,0,0.7)',
+    width: barWidth,
+    backgroundColor: '#10B981',
     borderRadius: 6,
-    alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingBottom: 2,
+    alignItems: 'center',
+    paddingBottom: 4,
   },
   barLabel: {
     fontSize: 10,
     color: '#fff',
+    fontWeight: '600',
   },
-  labels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  labelText: {
-    fontSize: 10,
-    color: '#666',
+  barMonth: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#065F46',
+    fontWeight: '500',
   },
 });
-
-

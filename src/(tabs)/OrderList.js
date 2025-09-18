@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, RefreshControl, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const orders = [
@@ -140,7 +140,7 @@ const ListHeader = () => (
   </View>
 );
 
-const OrdersList = () => {
+const OrdersList = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
@@ -149,6 +149,18 @@ const OrdersList = () => {
       setRefreshing(false);
     }, 2000);
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      if(navigation.canGoBack()){
+        navigation.goBack();
+        return true;
+      }
+      return false
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
+    return () => backHandler.remove()
+  }, [navigation])
 
   return (
     <SafeAreaView style={styles.container}>

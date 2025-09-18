@@ -8,8 +8,9 @@ import {
   TextInput,
   Alert,
   Pressable,
+  BackHandler,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
 import backButton from '../../assets/images/arrow-back.png';
@@ -79,6 +80,18 @@ const Customization = ({ navigation }) => {
       available: true,
     },
   ]);
+
+  useEffect(() => {
+    const backAction = () => {
+      if(navigation.canGoBack()){
+        navigation.goBack()
+        return true
+      }
+      return false
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
+    return () => backHandler.remove()
+  }, [navigation])
 
   const getCurrentData = () => {
     switch (activeTab) {

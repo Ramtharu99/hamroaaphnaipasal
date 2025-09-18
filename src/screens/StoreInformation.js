@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
@@ -90,6 +91,18 @@ const StoreInformation = ({ navigation }) => {
       autoHide: true,
     });
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      if(navigation.canGoBack()){
+        navigation.goBack()
+        return true
+      }
+      return false
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
+    return () => backHandler.remove();
+  }, [])
 
   const handleShoppingDetails = () => {
     showToast('Shop Details saved successfully!');
