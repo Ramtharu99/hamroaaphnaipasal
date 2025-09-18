@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TextInput,
   TouchableOpacity,
+  FlatList,
   Image,
-  StyleSheet,
-  RefreshControl,
   Modal,
+  StyleSheet,
+  Alert,
 } from 'react-native';
-import Toast, { BaseToast } from 'react-native-toast-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
@@ -25,102 +24,70 @@ const AllProducts = () => {
     description: '',
     stock: '',
   });
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const data = [
-        {
-          id: '1',
-          name: 'Smartphone X',
-          price: '$499.99',
-          imageUrl:
-            'https://images.pexels.com/photos/603022/pexels-photo-603022.jpeg',
-          description: 'Latest model with 5G support',
-          stock: '150',
-        },
-        {
-          id: '2',
-          name: 'Wireless Earbuds',
-          price: '$89.99',
-          imageUrl: 'https://via.placeholder.com/100',
-          description: 'Noise-canceling earbuds',
-          stock: '300',
-        },
-        {
-          id: '3',
-          name: 'Laptop Pro',
-          price: '$1299.99',
-          imageUrl: 'https://via.placeholder.com/100',
-          description: 'High-performance laptop',
-          stock: '75',
-        },
-        {
-          id: '4',
-          name: 'Smart Watch',
-          price: '$199.99',
-          imageUrl: 'https://via.placeholder.com/100',
-          description: 'Fitness tracking watch',
-          stock: '200',
-        },
-      ];
-      setProducts(data);
-    };
-    fetchProducts();
+    const initialProducts = [
+      {
+        id: '1',
+        name: 'Smartphone X',
+        price: '$499.99',
+        imageUrl: '',
+        description: 'Latest 5G model',
+        stock: '150',
+      },
+      {
+        id: '2',
+        name: 'Wireless Earbuds',
+        price: '$89.99',
+        imageUrl: '',
+        description: 'Noise-canceling',
+        stock: '300',
+      },
+      {
+        id: '3',
+        name: 'Laptop Pro',
+        price: '$1299.99',
+        imageUrl: '',
+        description: 'High-performance',
+        stock: '75',
+      },
+      {
+        id: '4',
+        name: 'Smart Watch',
+        price: '$199.99',
+        imageUrl: '',
+        description: 'Fitness tracking',
+        stock: '200',
+      },
+    ];
+    setProducts(initialProducts);
   }, []);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(filterText.toLowerCase()),
-  );
-
-  // Toast function
-  const showToast = message => {
-    Toast.show({
-      type: 'success',
-      text1: 'Success',
-      text2: message,
-      visibilityTime: 2000,
-      autoHide: true,
+  const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, response => {
+      if (!response.didCancel && !response.errorCode) {
+        setNewProduct(prev => ({ ...prev, imageUrl: response.assets[0].uri }));
+      }
     });
   };
 
-  // Custom Toast
-  const customToast = props => (
-    <BaseToast
-      {...props}
-      style={styles.toast}
-      contentContainerStyle={styles.toastContent}
-      text1Style={styles.toastText1}
-      text2Style={styles.toastText2}
-    />
-  );
-
-  const handleDelete = index => {
-    setProducts(prev => prev.filter((_, i) => i !== index));
-    showToast('Product deleted successfully!');
-  };
-
-  const handleEdit = index => {
-    setEditIndex(index);
-    setNewProduct({ ...products[index] });
-    setModalVisible(true);
-  };
-
   const handleSave = () => {
+    if (!newProduct.name) {
+      Alert.alert('Validation', 'Product name is required!');
+      return;
+    }
+
     if (editIndex !== null) {
-      setProducts(prev => {
-        const newProducts = [...prev];
-        newProducts[editIndex] = newProduct;
-        return newProducts;
-      });
-      showToast('Product updated successfully!');
+      const updated = [...products];
+      updated[editIndex] = newProduct;
+      setProducts(updated);
     } else {
       setProducts(prev => [
         ...prev,
         { ...newProduct, id: (prev.length + 1).toString() },
       ]);
-      showToast('Product added successfully!');
     }
+
     setModalVisible(false);
     setEditIndex(null);
     setNewProduct({
@@ -132,46 +99,78 @@ const AllProducts = () => {
     });
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
+  const handleEdit = index => {
+    setEditIndex(index);
+    setNewProduct({ ...products[index] });
+    setModalVisible(true);
   };
 
-  const renderProductItem = ({ item, index }) => (
+  const handleDelete = index => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this product?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () =>
+            setProducts(prev => prev.filter((_, i) => i !== index)),
+        },
+      ],
+    );
+  };
+
+  const renderItem = ({ item, index }) => (
     <View style={styles.card}>
-      <View style={styles.cardRow}>
+      {item.imageUrl ? (
         <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-        <View style={styles.productDetails}>
-          <Text style={styles.cardText}>Name: {item.name}</Text>
-          <Text style={styles.cardText}>Price: {item.price}</Text>
-          <Text style={styles.cardText}>Description: {item.description}</Text>
-          <Text style={styles.cardText}>Stock: {item.stock}</Text>
+      ) : (
+        <View
+          style={[
+            styles.productImage,
+            {
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#E5E7EB',
+            },
+          ]}
+        >
+          <Text>No Image</Text>
         </View>
-      </View>
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => handleEdit(index)}
-        >
-          <Text style={styles.actionText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDelete(index)}
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+      )}
+      <View style={styles.cardContent}>
+        <Text style={styles.cardText}>Name: {item.name}</Text>
+        <Text style={styles.cardText}>Price: {item.price}</Text>
+        <Text style={styles.cardText}>Description: {item.description}</Text>
+        <Text style={styles.cardText}>Stock: {item.stock}</Text>
+
+        {/* Buttons below the content */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => handleEdit(index)}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDelete(index)}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header Fixed */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Products</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>All Products</Text>
         <TouchableOpacity
-          style={styles.addButton}
+          style={styles.addButtonSide}
           onPress={() => {
             setEditIndex(null);
             setNewProduct({
@@ -184,95 +183,96 @@ const AllProducts = () => {
             setModalVisible(true);
           }}
         >
-          <Text style={styles.addButtonText}>+ Add New</Text>
+          <Text style={styles.addButtonText}>+ Add Product</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search */}
       <TextInput
         style={styles.searchInput}
-        placeholder="Search product name..."
-        placeholderTextColor="#6B7280"
+        placeholder="Search product..."
+        placeholderTextColor="gray"
         value={filterText}
         onChangeText={setFilterText}
       />
 
-      {/* Product List */}
       <FlatList
-        data={filteredProducts}
-        renderItem={renderProductItem}
+        data={products.filter(p =>
+          p.name.toLowerCase().includes(filterText.toLowerCase()),
+        )}
+        renderItem={renderItem}
         keyExtractor={item => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListFooterComponent={
-          <Text style={styles.pagination}>
-            Showing {filteredProducts.length} of {products.length} products
-          </Text>
-        }
         contentContainerStyle={{ paddingBottom: 20 }}
       />
 
-      {/* Add/Edit Modal */}
-      <Modal
-        transparent
-        animationType="slide"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
+      {/* Modal */}
+      <Modal transparent animationType="slide" visible={modalVisible}>
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               {editIndex !== null ? 'Edit Product' : 'Add Product'}
             </Text>
+
+            <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
-              placeholder="Name"
-              placeholderTextColor="#6B7280"
               value={newProduct.name}
+              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, name: text }))
               }
+              placeholder="Enter product name"
             />
+
+            <Text style={styles.label}>Price</Text>
             <TextInput
               style={styles.input}
-              placeholder="Price"
-              placeholderTextColor="#6B7280"
               value={newProduct.price}
+              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, price: text }))
               }
+              placeholder="Enter price"
             />
+
+            <Text style={styles.label}>Description</Text>
             <TextInput
               style={styles.input}
-              placeholder="Image URL"
-              placeholderTextColor="#6B7280"
-              value={newProduct.imageUrl}
-              onChangeText={text =>
-                setNewProduct(prev => ({ ...prev, imageUrl: text }))
-              }
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Description"
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="gray"
               value={newProduct.description}
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, description: text }))
               }
+              placeholder="Enter description"
             />
+
+            <Text style={styles.label}>Stock</Text>
             <TextInput
               style={styles.input}
-              placeholder="Stock"
-              placeholderTextColor="#6B7280"
               value={newProduct.stock}
+              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, stock: text }))
               }
+              placeholder="Enter stock quantity"
             />
+
+            <Text style={styles.label}>Image</Text>
+            <TouchableOpacity
+              style={styles.imagePickerButton}
+              onPress={pickImage}
+            >
+              <Text style={styles.imagePickerText}>
+                {newProduct.imageUrl ? 'Change Image' : 'Pick Image'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Save and Cancel */}
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={styles.buttonText}>
+                  {editIndex !== null ? 'Update' : 'Save'}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -284,9 +284,7 @@ const AllProducts = () => {
           </View>
         </View>
       </Modal>
-
-      <Toast config={{ success: customToast }} />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -294,63 +292,73 @@ export default AllProducts;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
-  headerContainer: {
+
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 8,
     marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
-  addButton: { backgroundColor: '#10B981', padding: 8, borderRadius: 6 },
-  addButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  addButtonSide: {
+    backgroundColor: '#10B981',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  addButtonText: { color: '#fff', fontWeight: '600' },
+
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 6,
     padding: 10,
-    marginBottom: 15,
+    marginBottom: 10,
     backgroundColor: '#fff',
   },
+
   card: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
     elevation: 2,
+    flexDirection: 'row',
   },
-  cardRow: { flexDirection: 'row', marginBottom: 10 },
   productImage: { width: 80, height: 80, borderRadius: 8, marginRight: 10 },
-  productDetails: { flex: 1 },
-  cardText: { fontSize: 14, marginBottom: 5, color: '#374151' },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end' },
+  cardContent: { flex: 1 },
+  cardText: { fontSize: 14, color: '#374151', marginBottom: 4 },
+
+  buttonRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+    justifyContent: 'flex-end',
+  },
   editButton: {
+    borderWidth: 1,
+    borderColor: 'gray',
     padding: 6,
     borderRadius: 4,
     marginRight: 8,
-    borderWidth: 1,
-    borderColor: 'gray',
-    width: 40,
   },
-  deleteButton: { backgroundColor: '#EF4444', padding: 6, borderRadius: 4 },
-  actionText: { color: 'black' },
-  deleteButtonText: { color: '#fff' },
-  modalContainer: {
+  editButtonText: { color: 'black', fontWeight: '600' },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    padding: 6,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  deleteButtonText: { color: '#fff', fontWeight: '600' },
+
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
+    width: '90%',
     backgroundColor: '#fff',
-    margin: 20,
     borderRadius: 10,
     padding: 20,
   },
@@ -360,6 +368,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  label: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
   input: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -367,15 +376,29 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     backgroundColor: '#F9FAFB',
-    color: '#000',
   },
-  modalActions: { flexDirection: 'row', justifyContent: 'space-between' },
+
+  imagePickerButton: {
+    backgroundColor: '#3B82F6',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  imagePickerText: { color: '#fff', fontWeight: '600' },
+
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
   saveButton: {
     flex: 1,
     backgroundColor: '#10B981',
     padding: 10,
     marginRight: 5,
     borderRadius: 6,
+    alignItems: 'center',
   },
   cancelButton: {
     flex: 1,
@@ -383,17 +406,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 5,
     borderRadius: 6,
+    alignItems: 'center',
   },
-  buttonText: { color: '#fff', textAlign: 'center', fontWeight: '600' },
-  toast: {
-    borderLeftWidth: 0,
-    height: 60,
-    backgroundColor: '#10B981',
-    borderRadius: 8,
-    width: "90%",
-  },
-  toastContent: { paddingHorizontal: 15 },
-  toastText1: { fontSize: 16, fontWeight: '600', color: '#fff' },
-  toastText2: { fontSize: 14, color: '#fff' },
-  pagination: { textAlign: 'center', marginTop: 10, color: '#6B7280' },
+  buttonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 });
