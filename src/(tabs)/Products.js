@@ -6,7 +6,7 @@ const Products = () => {
   return (
     <SafeAreaView
       style={{
-        flex: 1
+        flex: 1,
       }}
     > 
       <TopTabNavigator />

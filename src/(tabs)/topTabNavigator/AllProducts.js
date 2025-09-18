@@ -9,9 +9,9 @@ import {
   StyleSheet,
   RefreshControl,
   Modal,
-  SafeAreaView,
 } from 'react-native';
 import Toast, { BaseToast } from 'react-native-toast-message';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
@@ -73,6 +73,28 @@ const AllProducts = () => {
     product.name.toLowerCase().includes(filterText.toLowerCase()),
   );
 
+  // Toast function
+  const showToast = message => {
+    Toast.show({
+      type: 'success',
+      text1: 'Success',
+      text2: message,
+      visibilityTime: 2000,
+      autoHide: true,
+    });
+  };
+
+  // Custom Toast
+  const customToast = props => (
+    <BaseToast
+      {...props}
+      style={styles.toast}
+      contentContainerStyle={styles.toastContent}
+      text1Style={styles.toastText1}
+      text2Style={styles.toastText2}
+    />
+  );
+
   const handleDelete = index => {
     setProducts(prev => prev.filter((_, i) => i !== index));
     showToast('Product deleted successfully!');
@@ -110,26 +132,6 @@ const AllProducts = () => {
     });
   };
 
-  const showToast = message => {
-    Toast.show({
-      type: 'success',
-      text1: 'Success',
-      text2: message,
-      visibilityTime: 2000,
-      autoHide: true,
-    });
-  };
-
-  const customToast = props => (
-    <BaseToast
-      {...props}
-      style={styles.toast}
-      contentContainerStyle={styles.toastContent}
-      text1Style={styles.toastText1}
-      text2Style={styles.toastText2}
-    />
-  );
-
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1500);
@@ -165,6 +167,27 @@ const AllProducts = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Fixed */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Products</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            setEditIndex(null);
+            setNewProduct({
+              name: '',
+              price: '',
+              imageUrl: '',
+              description: '',
+              stock: '',
+            });
+            setModalVisible(true);
+          }}
+        >
+          <Text style={styles.addButtonText}>+ Add New</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Search */}
       <TextInput
         style={styles.searchInput}
@@ -181,27 +204,6 @@ const AllProducts = () => {
         keyExtractor={item => item.id}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Products</Text>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => {
-                setEditIndex(null);
-                setNewProduct({
-                  name: '',
-                  price: '',
-                  imageUrl: '',
-                  description: '',
-                  stock: '',
-                });
-                setModalVisible(true);
-              }}
-            >
-              <Text style={styles.addButtonText}>+ Add New</Text>
-            </TouchableOpacity>
-          </View>
         }
         ListFooterComponent={
           <Text style={styles.pagination}>
@@ -292,14 +294,24 @@ export default AllProducts;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
-  header: {
+  headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
     marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  headerTitle: { fontSize: 22, fontWeight: 'bold' },
-  addButton: { backgroundColor: '#10B981', padding: 10, borderRadius: 6 },
-  addButtonText: { color: '#fff', fontWeight: '600' },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
+  addButton: { backgroundColor: '#10B981', padding: 8, borderRadius: 6 },
+  addButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -318,7 +330,7 @@ const styles = StyleSheet.create({
   cardRow: { flexDirection: 'row', marginBottom: 10 },
   productImage: { width: 80, height: 80, borderRadius: 8, marginRight: 10 },
   productDetails: { flex: 1 },
-  cardText: { fontSize: 14, marginBottom: 5 },
+  cardText: { fontSize: 14, marginBottom: 5, color: '#374151' },
   actions: { flexDirection: 'row', justifyContent: 'flex-end' },
   editButton: {
     padding: 6,
@@ -326,10 +338,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderWidth: 1,
     borderColor: 'gray',
-    width: 40
+    width: 40,
   },
   deleteButton: { backgroundColor: '#EF4444', padding: 6, borderRadius: 4 },
-  actionText: { color: 'black', },
+  actionText: { color: 'black' },
   deleteButtonText: { color: '#fff' },
   modalContainer: {
     flex: 1,
@@ -378,6 +390,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#10B981',
     borderRadius: 8,
+    width: "90%",
   },
   toastContent: { paddingHorizontal: 15 },
   toastText1: { fontSize: 16, fontWeight: '600', color: '#fff' },
