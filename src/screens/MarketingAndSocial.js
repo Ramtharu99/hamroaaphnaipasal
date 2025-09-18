@@ -7,8 +7,10 @@ import {
   TextInput,
   Image,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import backButton from "../../assets/images/arrow-back.png"
 
 const socialIcons = {
   Facebook: require('../../assets/images/facebook.png'),
@@ -117,14 +119,15 @@ const MarketingAndSocial = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         {/* Go Back */}
-        <TouchableOpacity
+        <View style={styles.headerRow}>
+        <Pressable
           onPress={() => navigation.goBack()}
           style={styles.goBackButton}
         >
-          <Text>
-            <Text style={{ fontSize: 25 }}>← </Text>Go Back
-          </Text>
-        </TouchableOpacity>
+          <Image source={backButton} style={{height: 20, width: 20}} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Marketing & Social</Text>
+        </View>
 
         {/* Social Media Section */}
         <View style={styles.section}>
@@ -190,6 +193,7 @@ const MarketingAndSocial = ({ navigation }) => {
               <View style={styles.faqHeader}>
                 <TextInput
                   placeholder="New Question"
+                  placeholderTextColor="gray"
                   style={[styles.searchInput, { flex: 1, marginRight: 8 }]}
                   value={newFAQ.question}
                   onChangeText={text =>
@@ -200,6 +204,7 @@ const MarketingAndSocial = ({ navigation }) => {
                   placeholder="New Answer"
                   style={[styles.searchInput, { flex: 1, marginRight: 8 }]}
                   value={newFAQ.answer}
+                  placeholderTextColor="gray"
                   onChangeText={text =>
                     setNewFAQ(prev => ({ ...prev, answer: text }))
                   }
@@ -239,12 +244,32 @@ const MarketingAndSocial = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  goBackButton: { padding: 10,width: 150 },
+  headerRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 8,
+  paddingVertical: 12,
+  backgroundColor: '#E6F0EC',
+  position: 'relative',
+},
+headerTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#333',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  textAlign: 'center',
+},
+goBackButton: {
+  padding: 10,
+  zIndex: 1,
+},
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
-    marginBottom: 8,
     padding: 12,
+    marginTop: 8
   },
   sectionHeader: {
     flexDirection: 'row',

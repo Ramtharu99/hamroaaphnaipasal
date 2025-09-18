@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  TouchableOpacity,
+  Pressable,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import backButton from "../../assets/images/arrow-back.png"
 
 const Security = ({ navigation }) => {
   const [expandedSections, setExpandedSections] = useState({});
@@ -37,14 +47,15 @@ const Security = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 8 }}>
         {/* Go Back Button */}
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ padding: 10,width: 200 }}
-        >
-          <Text>
-            <Text style={{ fontSize: 25 }}>← </Text>Go Back
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerRow}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={styles.goBackButton}
+          >
+            <Image source={backButton} style={{ height: 20, width: 20 }} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Security</Text>
+        </View>
 
         {/* Sections */}
         {sections.map((section, sectionIndex) => (
@@ -62,12 +73,16 @@ const Security = ({ navigation }) => {
                   <View key={itemIndex} style={styles.itemRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemDescription}>{item.description}</Text>
+                      <Text style={styles.itemDescription}>
+                        {item.description}
+                      </Text>
                     </View>
                     <View style={styles.toggleContainer}>
                       <Switch
                         value={item.enabled}
-                        onValueChange={() => toggleItemStatus(sectionIndex, itemIndex)}
+                        onValueChange={() =>
+                          toggleItemStatus(sectionIndex, itemIndex)
+                        }
                         trackColor={{ false: '#ccc', true: '#1BB83A' }}
                         thumbColor={item.enabled ? '#fff' : '#f4f3f4'}
                       />
@@ -92,11 +107,31 @@ const Security = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  headerRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 8,
+  paddingVertical: 12,
+  backgroundColor: '#E6F0EC',
+  position: 'relative',
+},
+headerTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#333',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  textAlign: 'center',
+},
+goBackButton: {
+  padding: 10,
+  zIndex: 1,
+},
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
-    marginBottom: 12,
-    overflow: 'hidden',
+    marginTop: 8,
   },
   sectionHeader: {
     flexDirection: 'row',

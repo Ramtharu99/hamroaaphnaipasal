@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+  Pressable,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import backButton from "../../assets/images/arrow-back.png"
 
 const Transactions = ({ navigation }) => {
   const [expandedSections, setExpandedSections] = useState({});
@@ -8,22 +18,46 @@ const Transactions = ({ navigation }) => {
     {
       title: 'Payment Methods',
       items: [
-        { name: 'PayPal', description: 'Credit Cards - Powered By PayPal', enabled: true },
-        { name: 'Stripe', description: 'Credit Cards - Powered By Stripe', enabled: true },
-        { name: 'Khalti', description: 'Online Payment Services in Nepal', enabled: false },
-        { name: 'Cash on Delivery', description: 'Pay when you receive your order', enabled: true },
+        {
+          name: 'PayPal',
+          description: 'Credit Cards - Powered By PayPal',
+          enabled: true,
+        },
+        {
+          name: 'Stripe',
+          description: 'Credit Cards - Powered By Stripe',
+          enabled: true,
+        },
+        {
+          name: 'Khalti',
+          description: 'Online Payment Services in Nepal',
+          enabled: false,
+        },
+        {
+          name: 'Cash on Delivery',
+          description: 'Pay when you receive your order',
+          enabled: true,
+        },
       ],
     },
     {
       title: 'Subscriptions',
       items: [
-        { name: 'Monthly Plan', description: 'Recurring monthly subscription', enabled: true },
-        { name: 'Annual Plan', description: 'Recurring yearly subscription', enabled: false },
+        {
+          name: 'Monthly Plan',
+          description: 'Recurring monthly subscription',
+          enabled: true,
+        },
+        {
+          name: 'Annual Plan',
+          description: 'Recurring yearly subscription',
+          enabled: false,
+        },
       ],
     },
   ]);
 
-  const toggleSection = (title) => {
+  const toggleSection = title => {
     setExpandedSections(prev => ({
       ...prev,
       [title]: !prev[title],
@@ -33,7 +67,8 @@ const Transactions = ({ navigation }) => {
   const toggleItemStatus = (sectionIndex, itemIndex) => {
     setSections(prevSections => {
       const newSections = [...prevSections];
-      newSections[sectionIndex].items[itemIndex].enabled = !newSections[sectionIndex].items[itemIndex].enabled;
+      newSections[sectionIndex].items[itemIndex].enabled =
+        !newSections[sectionIndex].items[itemIndex].enabled;
       return newSections;
     });
   };
@@ -42,14 +77,15 @@ const Transactions = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 8 }}>
         {/* Go Back Button */}
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ padding: 10, width: 200 }}
-        >
-          <Text>
-            <Text style={{ fontSize: 25 }}>← </Text>Go Back
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerRow}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={styles.goBackButton}
+          >
+            <Image source={backButton} style={{ height: 20, width: 20 }} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Transactions</Text>
+        </View>
 
         {/* Sections */}
         {sections.map((section, sectionIndex) => (
@@ -68,19 +104,25 @@ const Transactions = ({ navigation }) => {
                   <View key={itemIndex} style={styles.itemRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemDescription}>{item.description}</Text>
+                      <Text style={styles.itemDescription}>
+                        {item.description}
+                      </Text>
                     </View>
                     <View style={styles.toggleContainer}>
                       <Switch
                         value={item.enabled}
-                        onValueChange={() => toggleItemStatus(sectionIndex, itemIndex)}
+                        onValueChange={() =>
+                          toggleItemStatus(sectionIndex, itemIndex)
+                        }
                         trackColor={{ false: '#ccc', true: '#1BB83A' }}
                         thumbColor={item.enabled ? '#fff' : '#f4f3f4'}
                       />
-                      <Text style={[
-                        styles.statusText,
-                        { color: item.enabled ? '#1BB83A' : '#555' }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.statusText,
+                          { color: item.enabled ? '#1BB83A' : '#555' },
+                        ]}
+                      >
                         {item.enabled ? 'Enabled' : 'Disabled'}
                       </Text>
                     </View>
@@ -96,11 +138,24 @@ const Transactions = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  goBackButton: { padding: 10,width: 100 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    backgroundColor: '#E6F0EC',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 50,
+  },
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
-    marginBottom: 12,
-    overflow: 'hidden',
+    marginTop: 8,
   },
   sectionHeader: {
     flexDirection: 'row',

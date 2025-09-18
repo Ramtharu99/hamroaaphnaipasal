@@ -7,10 +7,12 @@ import {
   Image,
   TextInput,
   Alert,
+  Pressable,
 } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
+import backButton from '../../assets/images/arrow-back.png';
 
 const Customization = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Themes');
@@ -166,14 +168,15 @@ const Customization = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Text style={styles.backButtonText}>
-          <Text style={{ fontSize: 20 }}>← </Text>Go Back
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.headerRow}>
+        <Pressable
+          style={styles.goBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Image source={backButton} style={{ height: 20, width: 20 }} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Customization</Text>
+      </View>
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
@@ -289,13 +292,34 @@ const Customization = ({ navigation }) => {
 export default Customization;
 
 const styles = StyleSheet.create({
+  headerRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 8,
+  paddingVertical: 12,
+  backgroundColor: '#E6F0EC',
+  position: 'relative',
+},
+headerTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#333',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  textAlign: 'center',
+},
+goBackButton: {
+  padding: 10,
+  zIndex: 1,
+},
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
   backButton: {
     padding: 10,
-    width: 150
+    width: 150,
   },
   backButtonText: {
     fontSize: 16,
@@ -387,7 +411,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     color: '#1BB83A',
-    fontSize: 12,
+    fontSize: 10,
+    width: 50
   },
   availableTag: {
     position: 'absolute',

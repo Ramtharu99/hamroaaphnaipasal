@@ -8,9 +8,12 @@ import {
   TextInput,
   Modal,
   Switch,
+  Pressable,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
+import backButton from '../../assets/images/arrow-back.png';
 
 const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
   const [promotions, setPromotions] = useState(initialPromotions);
@@ -142,19 +145,17 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Text style={styles.backButtonText}>
-          <Text style={{ fontSize: 20 }}>← </Text>Go Back
-        </Text>
-      </TouchableOpacity>
-
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.headerRow}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.goBackButton}
+        >
+          <Image source={backButton} style={styles.backIcon} />
+        </Pressable>
+
         <Text style={styles.headerTitle}>Promotions</Text>
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
@@ -218,7 +219,7 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
                 style={styles.deleteButton}
                 onPress={() => handleDelete(index)}
               >
-                <Text style={styles.actionText}>Delete</Text>
+                <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -321,7 +322,6 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
         </View>
       </Modal>
 
-      {/* Toast Component */}
       <Toast config={{ success: customToast }} />
     </SafeAreaView>
   );
@@ -330,28 +330,18 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
 export default Promotion;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    padding: 10,
-  },
-  backButton: {
-    padding: 10,
-    width: 150
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  header: {
+  container: { flex: 1, backgroundColor: '#F9FAFB', padding: 10 },
+
+  // Updated Header
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
-    paddingVertical: 10,
-    backgroundColor: '#FFF',
+    justifyContent: 'space-between',
+    backgroundColor: '#E6F0EC',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
+    marginBottom: 15,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -359,23 +349,22 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1F2937',
-    paddingLeft: 10,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    flex: 1,
   },
+  goBackButton: { padding: 8 },
+  backIcon: { width: 20, height: 20, resizeMode: 'contain' },
   addButton: {
     backgroundColor: '#10B981',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
-    marginRight: 10,
   },
-  addButtonText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
+  addButtonText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
+
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -385,9 +374,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     fontSize: 14,
   },
-  listContainer: {
-    flex: 1,
-  },
+  listContainer: { flex: 1 },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 8,
@@ -399,30 +386,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
   },
-  cardRow: {
-    marginBottom: 10,
-  },
-  cardText: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 5,
-  },
+  cardRow: { marginBottom: 10 },
+  cardText: { fontSize: 14, color: '#374151', marginBottom: 5 },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 5,
   },
-  switchLabel: {
-    fontSize: 14,
-    color: '#374151',
-    marginRight: 10,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
+  switchLabel: { fontSize: 14, color: '#374151', marginRight: 10 },
+  actions: { flexDirection: 'row', justifyContent: 'flex-end' },
   editButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 4,
@@ -434,17 +410,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 4,
   },
-  actionText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '500',
-  },
+  deleteButtonText: { color: 'white' },
+  actionText: { color: '#000', fontSize: 12, fontWeight: '500' },
   pagination: {
     textAlign: 'center',
     marginTop: 10,
     color: '#6B7280',
     fontSize: 12,
   },
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -508,16 +482,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
     borderRadius: 8,
   },
-  toastContent: {
-    paddingHorizontal: 15,
-  },
-  toastText1: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFF',
-  },
-  toastText2: {
-    fontSize: 14,
-    color: '#FFF',
-  },
+  toastContent: { paddingHorizontal: 15 },
+  toastText1: { fontSize: 16, fontWeight: '600', color: '#FFF' },
+  toastText2: { fontSize: 14, color: '#FFF' },
 });

@@ -7,9 +7,13 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  BackHandler,
+  Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
+import backButton from '../../assets/images/arrow-back.png';
 
 const ManageStaff = ({ navigation }) => {
   const [staffList, setStaffList] = useState([]);
@@ -49,6 +53,21 @@ const ManageStaff = ({ navigation }) => {
       },
     ];
     setStaffList(data);
+
+    // Android back button handling
+    const backAction = () => {
+      Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'YES', onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
   }, []);
 
   const filteredStaff = staffList.filter(staff =>
@@ -87,7 +106,6 @@ const ManageStaff = ({ navigation }) => {
       text1: 'Success',
       text2: message,
       visibilityTime: 2000,
-      autoHide: true,
     });
   };
 
@@ -105,18 +123,14 @@ const ManageStaff = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Text style={styles.backButtonText}>
-          <Text style={{ fontSize: 20 }}>← </Text>Go Back
-        </Text>
-      </TouchableOpacity>
-
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Image source={backButton} style={{ height: 20, width: 20 }} />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Staff</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -214,13 +228,14 @@ const ManageStaff = ({ navigation }) => {
               }
               placeholderTextColor="#6B7280"
             />
-            {/* Status Dropdown Trigger */}
+
             <TouchableOpacity
               style={styles.dropdownTrigger}
               onPress={() => setStatusDropdownVisible(true)}
             >
               <Text style={styles.dropdownText}>Status: {newStaff.status}</Text>
             </TouchableOpacity>
+
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.buttonText}>Save</Text>
@@ -266,7 +281,6 @@ const ManageStaff = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* Toast Component */}
       <Toast config={{ success: customToast }} />
     </SafeAreaView>
   );
@@ -278,43 +292,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingTop: 10,
   },
-  backButton: {
-    padding: 10,
-    width: 150
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  header: {
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    justifyContent: 'space-between',
+    backgroundColor: '#E6F0EC',
     paddingVertical: 10,
-    backgroundColor: '#FFF',
+    paddingHorizontal: 10,
     borderRadius: 8,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    marginBottom: 15,
+  },
+  backButton: {
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backText: {
+    fontSize: 20,
+    color: '#1F2937',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1F2937',
-    paddingLeft: 10,
+    textAlign: 'center',
+    flex: 1,
   },
   addButton: {
     backgroundColor: '#10B981',
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
-    marginRight: 10,
   },
   addButtonText: {
     color: '#FFF',
@@ -370,8 +386,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 4,
     marginRight: 8,
-    borderColor: "gray",
-    borderWidth: 2
+    borderColor: 'gray',
+    borderWidth: 2,
   },
   deleteButton: {
     backgroundColor: '#EF4444',
@@ -380,7 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   deleteButtonText: {
-    color: "#fff"
+    color: '#fff',
   },
   actionText: {
     color: '#000',
