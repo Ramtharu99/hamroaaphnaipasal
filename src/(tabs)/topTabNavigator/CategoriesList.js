@@ -69,7 +69,7 @@ const CategoryList = () => {
     status: 100,
     createdAt: 120,
     updatedAt: 120,
-    actions: 150,
+    actions: 100,
   };
 
   const onRefresh = () => {
@@ -161,10 +161,10 @@ const CategoryList = () => {
         {item.id}
       </Text>
       <Text style={[styles.categoryCell, { width: columnWidths.name }]}>
-        {item.name}
+        {item.name.length > 10 ? item.name.slice(0, 10) + "..." : item.name}
       </Text>
       <Text style={[styles.categoryCell, { width: columnWidths.description }]}>
-        {item.description}
+        {item.description.length > 25 ? item.description.slice(0, 25) + "..." : item.description}
       </Text>
       <Text
         style={[
@@ -349,22 +349,37 @@ const CategoryList = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB', paddingHorizontal: 16 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F9FAFB', 
+    paddingHorizontal: 16 
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#1F2937' },
-  headerButtons: { flexDirection: 'row', gap: 8 },
+  title: { 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: '#1F2937' 
+  },
+  headerButtons: { 
+    flexDirection: 'row', 
+    gap: 8 
+  },
   addButton: {
     backgroundColor: '#10B981',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
   },
-  addButtonText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
+  addButtonText: { 
+    color: '#FFFFFF', 
+    fontWeight: '600', 
+    fontSize: 14 
+  },
   deleteBtn: {
     backgroundColor: '#EF4444',
     paddingVertical: 8,
@@ -372,7 +387,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   disabledButton: { opacity: 0.5 },
-  deleteText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
+  deleteText: { 
+    color: '#FFFFFF', 
+    fontWeight: '600', 
+    fontSize: 14 
+  },
   searchInput: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
@@ -418,15 +437,20 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   statusText: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    fontSize: 12,
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 12,
+  fontWeight: '600',
+  color: '#FFFFFF',
+  textAlign: 'center',
+  fontSize: 12,
+  marginRight: 10
+},
+  actions: { 
+    flexDirection: 'row', 
+    justifyContent: 'flex-end', 
+    gap: 8 
   },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
   editBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -488,7 +512,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
   },
-  statusBtnText: { fontWeight: '600', fontSize: 14, color: '#1F2937' },
+  statusBtnText: { 
+    fontWeight: '600', 
+    fontSize: 14, 
+    color: '#1F2937' 
+  },
   statusBtnTextActive: { color: '#FFFFFF' },
   modalBtns: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   saveBtn: {
