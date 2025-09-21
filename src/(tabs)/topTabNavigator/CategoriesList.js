@@ -117,7 +117,7 @@ const CategoryList = () => {
   const handleDelete = id => {
     Alert.alert(
       'Confirm Delete',
-      'Are you sure you want to delete this category?',
+      'Are you sure you want to delete?',
       [
         { text: 'Cancel', style: 'cancel' },
         {

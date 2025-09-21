@@ -10,10 +10,11 @@ import {
   Image,
   Pressable,
   BackHandler,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
-import backButton from "../../assets/images/arrow-back.png"
+import backButton from '../../assets/images/arrow-back.png';
 
 const Tickets = ({ navigation }) => {
   const [tickets, setTickets] = useState([]);
@@ -72,14 +73,17 @@ const Tickets = ({ navigation }) => {
     fetchTickets();
 
     const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
       }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove()
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
   }, []);
 
   const filteredTickets = tickets.filter(ticket =>
@@ -87,8 +91,14 @@ const Tickets = ({ navigation }) => {
   );
 
   const handleDelete = index => {
-    setTickets(prev => prev.filter((_, i) => i !== index));
-    showToast('Ticket deleted successfully!');
+    Alert.alert('Confirm Delete', 'Are you sure want to delete?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setTickets(prev => prev.filter((_, i) => i !== index)),
+      },
+    ]);
   };
 
   const handleEdit = index => {
@@ -166,7 +176,7 @@ const Tickets = ({ navigation }) => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Image source={backButton} style={{height: 20, width: 20}} />
+          <Image source={backButton} style={{ height: 20, width: 20 }} />
         </Pressable>
 
         <Text style={styles.headerTitle}>Tickets</Text>

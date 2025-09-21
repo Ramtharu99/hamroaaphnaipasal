@@ -11,6 +11,7 @@ import {
   Pressable,
   Image,
   BackHandler,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
@@ -76,14 +77,17 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
     fetchPromotions();
 
     const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
       }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove()
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
   }, []);
 
   const filteredPromotions = promotions.filter(promo =>
@@ -91,8 +95,15 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
   );
 
   const handleDelete = index => {
-    setPromotions(prev => prev.filter((_, i) => i !== index));
-    showToast('Promotion deleted successfully!');
+    Alert.alert('Confirm Delete', 'Are you sure want to delete?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          setPromotions(prev => prev.filter((_, i) => i !== index)),
+      },
+    ]);
   };
 
   const handleEdit = index => {

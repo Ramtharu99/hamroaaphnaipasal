@@ -1,14 +1,14 @@
+// AppNavigator.js
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   Image,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
   StatusBar,
+  StyleSheet,
   BackHandler,
-  Alert,
+  Animated,
+  TouchableOpacity,
   Pressable,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,13 +16,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Main Tabs
+// Import Screens
 import DashBoardScreen from './DashBoard';
 import Orders from './OrderList';
 import Analysis from './Analytics';
 import Products from './Products';
-
-// Settings screens
 import StoreInformation from '../screens/StoreInformation';
 import Policies from '../screens/Policies';
 import MarketingAndSocial from '../screens/MarketingAndSocial';
@@ -40,18 +38,19 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const TopTab = createMaterialTopTabNavigator();
 
+// Tab icons
 const icons = {
   DashBoard: require('../../assets/images/home.png'),
   Orders: require('../../assets/images/order.png'),
   Products: require('../../assets/images/inventory.png'),
   Analytics: require('../../assets/images/analysis.png'),
   Setting: require('../../assets/images/setting.png'),
+  Profile: require('../../assets/images/profile.png'),
   Dropdown: require('../../assets/images/dropdown.png'),
-  Profile: require('../../assets/images/profile.png'), // 👈 Add your profile image here
 };
 
-// Settings Top Tabs
-const SettingsTabs = ({ navigation }) => {
+// Top Tabs inside Settings
+const SettingsTabs = () => {
   return (
     <TopTab.Navigator
       screenOptions={{
@@ -66,7 +65,7 @@ const SettingsTabs = ({ navigation }) => {
   );
 };
 
-// Settings Stack Navigator
+// Settings Stack with Dropdown
 const SettingsStack = () => {
   const [moreDropdownVisible, setMoreDropdownVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -121,7 +120,6 @@ const SettingsStack = () => {
     'Security',
     'More Settings',
   ];
-
   const moreOptions = [
     'Customization',
     'Promotions',
@@ -135,18 +133,17 @@ const SettingsStack = () => {
         name="SettingsHome"
         component={({ navigation }) => (
           <SafeAreaView style={styles.modalContent}>
-            {/* Header row */}
             <View style={styles.headerRow}>
               <Text style={styles.modalHeader}>⚙️ Settings</Text>
-              <Pressable onPress={() => navigation.navigate('Profile')}>
-                <Image source={icons.Profile} style={styles.profileImage} />
+              <Pressable onPress={() => navigation.navigate("Profile")}>
+              <Image source={icons.Profile} style={styles.profileImage} />
               </Pressable>
             </View>
 
             {settingsTabs.map(tab => (
               <View key={tab}>
                 <TouchableOpacity
-                  style={styles.option}
+                  style={styles.optionContainer}
                   onPress={() => {
                     if (tab === 'More Settings') toggleMoreDropdown();
                     else if (tab === 'Attributes' || tab === 'Category')
@@ -154,19 +151,16 @@ const SettingsStack = () => {
                     else navigation.navigate(tab);
                   }}
                 >
-                  <View style={styles.optionContainer}>
-                    <Text style={styles.optionText}>{tab}</Text>
-                    {tab === 'More Settings' && (
-                      <Animated.View
-                        style={{ transform: [{ rotate: rotateIcon }] }}
-                      >
-                        <Image
-                          source={icons['Dropdown']}
-                          style={styles.dropdownIcon}
-                        />
-                      </Animated.View>
-                    )}
-                  </View>
+                  <Text style={styles.optionText}>{tab}</Text>
+                  {tab === 'More Settings' && (
+                    <Animated.Image
+                      source={icons.Dropdown}
+                      style={[
+                        styles.dropdownIcon,
+                        { transform: [{ rotate: rotateIcon }] },
+                      ]}
+                    />
+                  )}
                 </TouchableOpacity>
 
                 {tab === 'More Settings' && moreDropdownVisible && (
@@ -207,32 +201,13 @@ const SettingsStack = () => {
       <Stack.Screen name="Promotions" component={Promotions} />
       <Stack.Screen name="Tickets" component={Tickets} />
       <Stack.Screen name="Manage Staff" component={ManageStaff} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };
 
-const TabNavigator = ({ navigation }) => {
-  useEffect(() => {
-    const backAction = () => {
-      Alert.alert(
-        'Exit App',
-        'Are you sure you want to exit?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Yes', onPress: () => BackHandler.exitApp() },
-        ],
-        { cancelable: true },
-      );
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
-  }, []);
-
+// Main Tab Navigator
+const TabNavigator = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -251,12 +226,6 @@ const TabNavigator = ({ navigation }) => {
             paddingTop: 8,
             paddingBottom: 8,
             elevation: 8,
-            shadowColor: '#000',
-            shadowOpacity: 0.1,
-            shadowOffset: { width: 0, height: 4 },
-            shadowRadius: 10,
-            marginHorizontal: 8,
-            marginBottom: 4,
           },
           tabBarIcon: ({ focused }) => {
             const icon = icons[route.name];
@@ -305,18 +274,17 @@ const TabNavigator = ({ navigation }) => {
   );
 };
 
-const AppNavigator = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Tabs" component={TabNavigator} />
-  </Stack.Navigator>
-);
+// Root App Navigator
+const AppNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={TabNavigator} />
+    </Stack.Navigator>
+  );
+};
 
 const styles = StyleSheet.create({
-  modalContent: {
-    backgroundColor: '#E7EEE6',
-    padding: 16,
-    flex: 1,
-  },
+  modalContent: { flex: 1, backgroundColor: '#E7EEE6', padding: 16 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -324,53 +292,29 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalHeader: { fontSize: 18, fontWeight: 'bold', color: '#111' },
-  profileImage: {
-    width: 35,
-    height: 35,
-    borderRadius: 20,
-  },
-  option: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
+  profileImage: { width: 35, height: 35, borderRadius: 20 },
+  optionText: { fontSize: 16, color: '#333', width: 150 },
   optionContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
   },
-  optionText: { fontSize: 16, color: '#333', width: 300 },
-  dropdownIcon: {
-    width: 16,
-    height: 16,
-    resizeMode: 'contain',
-    tintColor: '#333',
-  },
+  dropdownIcon: { width: 16, height: 16, tintColor: '#333' },
   dropdownContainer: {
-    backgroundColor: '#E7EEE6',
-    borderRadius: 8,
     marginLeft: 24,
-    marginRight: 16,
-    width: '100%',
-    alignSelf: 'flex-end',
+    marginTop: 4,
+    backgroundColor: '#fff',
+    borderRadius: 8,
     overflow: 'hidden',
   },
   dropdownOption: {
-    backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    marginVertical: 4,
-    marginHorizontal: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
-  dropdownOptionText: { fontSize: 14, color: '#333', textAlign: 'center' },
+  dropdownOptionText: { fontSize: 14, color: '#333' },
 });
 
 export default AppNavigator;

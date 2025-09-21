@@ -56,11 +56,11 @@ const ManageStaff = ({ navigation }) => {
 
     // Android back button handling
     const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
+      if (navigation.canGoBack()) {
+        navigation.goBack();
         return true;
       }
-      return false
+      return false;
     };
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -96,8 +96,14 @@ const ManageStaff = ({ navigation }) => {
   };
 
   const handleDelete = index => {
-    setStaffList(prev => prev.filter((_, i) => i !== index));
-    showToast('Staff deleted successfully!');
+    Alert.alert('Confirm Delete', 'Are you sure want to delete?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setStaffList(prev => prev.filter((_, i) => i !== index)),
+      },
+    ]);
   };
 
   const showToast = message => {
