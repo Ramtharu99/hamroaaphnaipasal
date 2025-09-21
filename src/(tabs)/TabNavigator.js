@@ -34,7 +34,7 @@ import Customization from '../screens/Customization';
 import Promotions from '../screens/Promotions';
 import Tickets from '../screens/Tickets';
 import ManageStaff from '../screens/ManageStaff';
-import Profile from "../screens/Profile"
+import Profile from '../screens/Profile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -47,7 +47,7 @@ const icons = {
   Analytics: require('../../assets/images/analysis.png'),
   Setting: require('../../assets/images/setting.png'),
   Dropdown: require('../../assets/images/dropdown.png'),
-  Profile: require('../../assets/images/profile.png'),
+  Profile: require('../../assets/images/profile.png'), // 👈 Add your profile image here
 };
 
 // Settings Top Tabs
@@ -138,8 +138,8 @@ const SettingsStack = () => {
             {/* Header row */}
             <View style={styles.headerRow}>
               <Text style={styles.modalHeader}>⚙️ Settings</Text>
-              <Pressable onPress={() => navigation.navigate("Profile")}>
-              <Image source={icons.Profile} style={styles.profileImage} />
+              <Pressable onPress={() => navigation.navigate('Profile')}>
+                <Image source={icons.Profile} style={styles.profileImage} />
               </Pressable>
             </View>
 
@@ -207,7 +207,7 @@ const SettingsStack = () => {
       <Stack.Screen name="Promotions" component={Promotions} />
       <Stack.Screen name="Tickets" component={Tickets} />
       <Stack.Screen name="Manage Staff" component={ManageStaff} />
-      <Stack.Screen name='Profile' component={Profile} />
+      <Tab.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };
@@ -215,11 +215,16 @@ const SettingsStack = () => {
 const TabNavigator = ({ navigation }) => {
   useEffect(() => {
     const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack();
-        return true
-      }
-      return false;
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Yes', onPress: () => BackHandler.exitApp() },
+        ],
+        { cancelable: true },
+      );
+      return true;
     };
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',

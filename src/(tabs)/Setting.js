@@ -1,21 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
-  Modal,
-  TouchableWithoutFeedback,
+  Image,
+  SafeAreaView,
+  Pressable,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import StoreInformation from "../screens/StoreInformation";
-import Policies from "../screens/Policies";
-import MarketingAndSocial from "../screens/MarketingAndSocial";
-import Transactions from "../screens/Transactions";
-import Operations from "../screens/Operations";
-import Security from "../screens/Security";
+
+import Profile from "../screens/Profile";
+
+const icons = {
+  Profile: require("../../assets/images/profile.png"),
+};
 
 const settingsTabs = [
   "Store Information",
@@ -24,180 +23,73 @@ const settingsTabs = [
   "Transactions",
   "Operations",
   "Security",
+  "Customization",
+  "Promotions",
+  "Tickets",
+  "Manage Staff",
 ];
 
-const Setting = () => {
-  const [activeTab, setActiveTab] = useState(null);
-  const [showDropUp, setShowDropUp] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 2000);
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Store Information":
-        return <StoreInformation />;
-      case "Policies":
-        return <Policies />;
-      case "Marketing & Social":
-        return <MarketingAndSocial />;
-      case "Transactions":
-        return <Transactions />;
-      case "Operations":
-        return <Operations />;
-      case "Security":
-        return <Security />;
-      default:
-        return null;
-    }
-  };
-
+const Setting = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled">
-        {/* Tabs */}
-        <View style={styles.tabContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+      {/* Header */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>⚙️ Settings</Text>
+        <Pressable onPress={() => navigation.navigate("Profile")}>
+          <Image source={icons.Profile} style={styles.profileImage} />
+        </Pressable>
+      </View>
+
+      {/* Settings Options */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+        {settingsTabs.map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={styles.option}
+            onPress={() => navigation.navigate(tab)}
           >
-            {settingsTabs.map((tab) => (
-              <TouchableOpacity
-                key={tab}
-                style={[styles.tabButton, activeTab === tab && styles.activeTab]}
-                onPress={() => {
-                  setActiveTab(tab);
-                  setShowDropUp(true);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeTab === tab && styles.activeTabText,
-                  ]}
-                >
-                  {tab}
-                </Text>
-              </TouchableOpacity>
-            ))}
-
-            {/* More Tab */}
-            <TouchableOpacity
-              style={styles.tabButton}
-              onPress={() => setShowDropUp(true)}
-            >
-              <Text style={styles.tabText}>More</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+            <Text style={styles.optionText}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
-
-      {/* Drop-Up Modal */}
-      <Modal
-        visible={showDropUp}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowDropUp(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setShowDropUp(false)}>
-          <View style={styles.overlay} />
-        </TouchableWithoutFeedback>
-
-        <View style={styles.dropUpContainer}>
-          {/* If a tab is active → show its component */}
-          {activeTab ? (
-            <>
-              <Text style={styles.dropUpTitle}>{activeTab}</Text>
-              {renderTabContent()}
-            </>
-          ) : (
-            <>
-              <Text style={styles.dropUpTitle}>More Settings</Text>
-              {["Customization", "Promotions", "Tickets", "Manage Staff"].map(
-                (option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={styles.dropUpItem}
-                    onPress={() => {
-                      setActiveTab(option);
-                      setShowDropUp(false);
-                    }}
-                  >
-                    <Text style={styles.dropUpText}>{option}</Text>
-                  </TouchableOpacity>
-                )
-              )}
-            </>
-          )}
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#F7F8FA" 
-  },
-  tabContainer: { 
-    flexDirection: "row", 
-    marginBottom: 12, 
-    padding: 8 
-  },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginRight: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-  },
-  activeTab: { 
-    backgroundColor: "#1BB83A", 
-    borderColor: "#1BB83A" 
-  },
-  tabText: { 
-    fontSize: 14, 
-    color: "#333" 
-  },
-  activeTabText: { 
-    color: "#fff", 
-    fontWeight: "bold" 
-  },
-
-  overlay: { 
-    flex: 1, 
-    backgroundColor: "rgba(0,0,0,0.3)" 
-  },
-  dropUpContainer: {
-    backgroundColor: "#EEEEEE",
+  container: {
+    flex: 1,
+    backgroundColor: "#F7F8FA",
     padding: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: "70%",
   },
-  dropUpTitle: {
-    fontSize: 16,
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 12,
     color: "#111",
   },
-  dropUpItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
   },
-  dropUpText: { 
-    fontSize: 15, 
-    color: "#333" 
+  option: {
+    backgroundColor: "#fff",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  optionText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
 
