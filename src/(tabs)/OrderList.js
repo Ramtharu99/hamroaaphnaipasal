@@ -7,7 +7,7 @@ const orders = [
     id: '1',
     customer: 'John Doe',
     email: 'johndoe@example.com',
-    date: '2023-11-23',
+    date: '23-11-23',
     status: 'Fulfilled',
     amount: '$25.00',
   },
@@ -15,7 +15,7 @@ const orders = [
     id: '2',
     customer: 'Jane Smith',
     email: 'janesmith@example.com',
-    date: '2023-11-22',
+    date: '23-11-22',
     status: 'Pending',
     amount: '$15.00',
   },
@@ -23,7 +23,7 @@ const orders = [
     id: '3',
     customer: 'Robert Johnson',
     email: 'robertj@example.com',
-    date: '2023-11-21',
+    date: '23-11-21',
     status: 'Processing',
     amount: '$35.00',
   },
@@ -31,7 +31,7 @@ const orders = [
     id: '4',
     customer: 'Emily Davis',
     email: 'emilydavis@example.com',
-    date: '2023-11-20',
+    date: '23-11-20',
     status: 'Fulfilled',
     amount: '$45.00',
   },
@@ -39,7 +39,7 @@ const orders = [
     id: '5',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -47,7 +47,7 @@ const orders = [
     id: '6',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -55,7 +55,7 @@ const orders = [
     id: '7',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -63,7 +63,7 @@ const orders = [
     id: '8',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -71,7 +71,7 @@ const orders = [
     id: '9',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -79,7 +79,7 @@ const orders = [
     id: '10',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -87,7 +87,7 @@ const orders = [
     id: '11',
     customer: 'Michael Brown',
     email: 'michaelb@example.com',
-    date: '2023-11-19',
+    date: '23-11-19',
     status: 'Canceled',
     amount: '$55.00',
   },
@@ -113,7 +113,7 @@ const OrderItem = ({ item }) => (
     <Text style={styles.orderId}>{item.id}</Text>
     <View style={styles.customer}>
       <Text style={styles.customerName}>{item.customer}</Text>
-      <Text style={styles.email}>{item.email}</Text>
+      <Text style={styles.email}>{item.email.length > 18 ? item.email.slice(0, 8) + "***"  : item.email}</Text>
     </View>
     <Text style={styles.date}>{item.date}</Text>
     <View style={styles.statusContainer}>
@@ -165,7 +165,7 @@ const OrdersList = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Recent Orders</Text>
+        <Text style={styles.headerText}>📦 Recent Orders</Text>
         <Text style={styles.subText}>
           Latest customer orders from your store
         </Text>
@@ -199,19 +199,19 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   headerText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#111827',
   },
   subText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#6b7280',
-    marginTop: 2,
+    marginTop: 4,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: '#C8E6C9',
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 8,

@@ -181,7 +181,13 @@ const CategoryList = () => {
         onChangeText={setFilterText}
       />
 
-      <ScrollView horizontal showsHorizontalScrollIndicator>
+      <ScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={{ minWidth: totalWidth }}>
           <View style={styles.tableHeader}>
             <Text style={[styles.headerCell, { width: columnWidths.id }]}>
@@ -219,9 +225,6 @@ const CategoryList = () => {
             )}
             renderItem={renderCategoryItem}
             keyExtractor={item => item.id}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
           />
         </View>
       </ScrollView>
@@ -271,7 +274,6 @@ const CategoryList = () => {
                 value={formData.status === 'Active'}
               />
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#C8E6C9',
     paddingVertical: 8,
   },
   headerCell: {

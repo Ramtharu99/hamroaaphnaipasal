@@ -146,33 +146,64 @@ const Attributes = () => {
   };
 
   const handleDelete = id => {
-    Alert.alert('Confirm Delete', 'Are you sure you want to delete this attribute?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          setAttributes(prev => prev.filter(attr => attr.id !== id)),
-      },
-    ]);
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this attribute?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () =>
+            setAttributes(prev => prev.filter(attr => attr.id !== id)),
+        },
+      ],
+    );
   };
 
   const renderAttributeItem = ({ item }) => (
     <View style={[styles.row, { width: totalWidth }]}>
       <Text style={[styles.cell, { width: columnWidths.id }]}>{item.id}</Text>
-      <Text style={[styles.cell, { width: columnWidths.class }]}>{item.class}</Text>
-      <Text style={[styles.cell, { width: columnWidths.attribute }]}>{item.attribute}</Text>
-      <Text style={[styles.cell, { width: columnWidths.values }]}>{item.values.join(', ')}</Text>
-      <Text style={[styles.cell, { width: columnWidths.type }]}>{item.type}</Text>
-      <Text style={[styles.cell, { width: columnWidths.variant }]}>{item.variant}</Text>
-      <Text style={[styles.cell, { width: columnWidths.filter }]}>{item.filter}</Text>
-      <Text style={[styles.cell, { width: columnWidths.status }]}>{item.status}</Text>
-      <Text style={[styles.cell, { width: columnWidths.created }]}>{item.created}</Text>
-      <View style={[styles.cell, { width: columnWidths.actions, flexDirection: 'row' }]}>
-        <TouchableOpacity style={styles.editBtn} onPress={() => openModalForEdit(item)}>
+      <Text style={[styles.cell, { width: columnWidths.class }]}>
+        {item.class}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.attribute }]}>
+        {item.attribute}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.values }]}>
+        {item.values.join(', ')}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.type }]}>
+        {item.type}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.variant }]}>
+        {item.variant}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.filter }]}>
+        {item.filter}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.status }]}>
+        {item.status}
+      </Text>
+      <Text style={[styles.cell, { width: columnWidths.created }]}>
+        {item.created}
+      </Text>
+      <View
+        style={[
+          styles.cell,
+          { width: columnWidths.actions, flexDirection: 'row' },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() => openModalForEdit(item)}
+        >
           <Text style={styles.editText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id)}>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => handleDelete(item.id)}
+        >
           <Text style={styles.deleteText}>Delete</Text>
         </TouchableOpacity>
       </View>
@@ -199,20 +230,48 @@ const Attributes = () => {
       />
 
       {/* Horizontal Scroll (Table) */}
-      <ScrollView horizontal showsHorizontalScrollIndicator>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={{ minWidth: totalWidth }}>
           {/* Header */}
           <View style={styles.tableHeader}>
-            <Text style={[styles.headerCell, { width: columnWidths.id }]}>#</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.class }]}>Class</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.attribute }]}>Attribute</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.values }]}>Values</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.type }]}>Type</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.variant }]}>Variant</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.filter }]}>Filter</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.status }]}>Status</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.created }]}>Created</Text>
-            <Text style={[styles.headerCell, { width: columnWidths.actions }]}>Actions</Text>
+            <Text style={[styles.headerCell, { width: columnWidths.id }]}>
+              #
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.class }]}>
+              Class
+            </Text>
+            <Text
+              style={[styles.headerCell, { width: columnWidths.attribute }]}
+            >
+              Attribute
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.values }]}>
+              Values
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.type }]}>
+              Type
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.variant }]}>
+              Variant
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.filter }]}>
+              Filter
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.status }]}>
+              Status
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.created }]}>
+              Created
+            </Text>
+            <Text style={[styles.headerCell, { width: columnWidths.actions }]}>
+              Actions
+            </Text>
           </View>
 
           {/* FlatList */}
@@ -222,9 +281,6 @@ const Attributes = () => {
             )}
             renderItem={renderAttributeItem}
             keyExtractor={item => item.id}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
           />
         </View>
       </ScrollView>
@@ -276,9 +332,15 @@ const Attributes = () => {
             />
 
             {/* Save and Cancel Buttons */}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                marginTop: 10,
+              }}
+            >
               <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: '#9CA3AF' }]}
+                style={[styles.modalBtn, { backgroundColor: '#EF4444' }]}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={{ color: '#fff', fontWeight: '600' }}>Cancel</Text>
@@ -330,7 +392,7 @@ const styles = StyleSheet.create({
 
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#C8E6C9',
     paddingVertical: 8,
   },
   headerCell: {

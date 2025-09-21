@@ -354,7 +354,6 @@ export default Promotion;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB', padding: 10 },
 
-  // Updated Header
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',

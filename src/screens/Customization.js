@@ -83,15 +83,18 @@ const Customization = ({ navigation }) => {
 
   useEffect(() => {
     const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
       }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove()
-  }, [navigation])
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const getCurrentData = () => {
     switch (activeTab) {
@@ -193,60 +196,27 @@ const Customization = ({ navigation }) => {
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            activeTab === 'Themes' && styles.navButtonActive,
-          ]}
-          onPress={() => setActiveTab('Themes')}
-        >
-          <Text
+        {['Themes', 'Banners', 'Colors'].map(tab => (
+          <TouchableOpacity
+            key={tab}
             style={[
-              styles.navButtonText,
-              activeTab === 'Themes'
-                ? styles.navButtonTextActive
-                : styles.navButtonTextInactive,
+              styles.navButton,
+              activeTab === tab && styles.navButtonActive,
             ]}
+            onPress={() => setActiveTab(tab)}
           >
-            Themes
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            activeTab === 'Banners' && styles.navButtonActive,
-          ]}
-          onPress={() => setActiveTab('Banners')}
-        >
-          <Text
-            style={[
-              styles.navButtonText,
-              activeTab === 'Banners'
-                ? styles.navButtonTextActive
-                : styles.navButtonTextInactive,
-            ]}
-          >
-            Banners
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            activeTab === 'Colors' && styles.navButtonActive,
-          ]}
-          onPress={() => setActiveTab('Colors')}
-        >
-          <Text
-            style={[
-              styles.navButtonText,
-              activeTab === 'Colors'
-                ? styles.navButtonTextActive
-                : styles.navButtonTextInactive,
-            ]}
-          >
-            Colors
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                activeTab === tab
+                  ? styles.navButtonTextActive
+                  : styles.navButtonTextInactive,
+              ]}
+            >
+              {tab}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* Search Input */}
@@ -258,7 +228,7 @@ const Customization = ({ navigation }) => {
           onChangeText={setSearchQuery}
         />
         <Text style={styles.pagination}>
-          Showing 1 to {filteredData.length} of {getCurrentData().length}
+          Showing 1 to {filteredData.length} of {getCurrentData().length}{' '}
           {activeTab.toLowerCase()}
         </Text>
       </View>
@@ -306,37 +276,29 @@ export default Customization;
 
 const styles = StyleSheet.create({
   headerRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 8,
-  paddingVertical: 12,
-  backgroundColor: '#E6F0EC',
-  position: 'relative',
-},
-headerTitle: {
-  fontSize: 18,
-  fontWeight: '600',
-  color: '#333',
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  textAlign: 'center',
-},
-goBackButton: {
-  padding: 10,
-  zIndex: 1,
-},
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    backgroundColor: '#E6F0EC',
+    position: 'relative',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+  },
+  goBackButton: {
+    padding: 10,
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  backButton: {
-    padding: 10,
-    width: 150,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   navBar: {
     flexDirection: 'row',
@@ -419,24 +381,27 @@ goBackButton: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: '#1BB83A',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 12,
-    color: '#1BB83A',
-    fontSize: 10,
-    width: 50
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
+    overflow: 'hidden',
   },
   availableTag: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    color: '#3B82F6',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    color: '#FFF',
     fontSize: 12,
+    fontWeight: '600',
+    overflow: 'hidden',
   },
   cardTitle: {
     fontSize: 18,

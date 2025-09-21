@@ -100,8 +100,8 @@ const Products = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.header}>Top Products</Text>
-        <Text>Best selling products this month</Text>
+        <Text style={styles.header}>🔥 Top Products</Text>
+        <Text style={styles.subHeader}>Best selling products this month</Text>
         <ProductCard
           title="Wireless Headphones"
           value="$12,540"
@@ -134,16 +134,16 @@ const Products = () => {
         />
       </View>
       <View style={styles.section}>
-        <Text style={styles.header}>Inventory Status</Text>
-        <Text>Products with low stock levels</Text>
+        <Text style={styles.header}>📦 Inventory Status</Text>
+        <Text style={styles.subHeader}>Products with low stock levels</Text>
         <InventoryCard title="Wireless Earbuds" current={12} target={50} />
         <InventoryCard title="Phone Case" current={8} target={30} />
         <InventoryCard title="Screen Protector" current={5} target={20} />
         <InventoryCard title="Charging Cable" current={15} target={40} />
       </View>
       <View style={styles.section}>
-        <Text style={styles.header}>Traffic Sources</Text>
-        <Text>Where your visitors are coming from</Text>
+        <Text style={styles.header}>🌏 Traffic Sources</Text>
+        <Text style={styles.subHeader}>Where your visitors are coming from</Text>
         <TrafficCard source="Direct" visitors="12,345" percentage={40} />
         <TrafficCard source="Organic Search" visitors="9,876" percentage={30} />
         <TrafficCard source="Social Media" visitors="6,789" percentage={20} />
@@ -165,10 +165,10 @@ const styles = StyleSheet.create({
   section: { 
     marginBottom: 20,
   },
-  header: {
-    fontSize: 18, 
-    fontWeight: 'bold' 
-  },
+  // header: {
+  //   fontSize: 18, 
+  //   fontWeight: 'bold' 
+  // },
   card: { 
     padding: 10, 
     borderWidth: 1, 
@@ -207,13 +207,17 @@ const styles = StyleSheet.create({
     color: 'green', 
     backgroundColor: "#C8E6C9",
     fontSize: 14, 
-    padding: 1.5
+    padding: 1.5,
+    borderRadius: 8,
+    paddingHorizontal: 8
   },
   negative: { 
     color: 'red',
     backgroundColor: "#FFCDD2",
     fontSize: 14,
-    padding: 2
+    padding: 2,
+    borderRadius: 8,
+    paddingHorizontal: 8
   },
   progressRow: {
     flexDirection: 'row',
@@ -227,6 +231,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flex: 1,
     marginRight: 8,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111',
+    marginBottom: 4,
+  },
+  subHeader: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 12,
   },
   progress: {
     height: 8,
