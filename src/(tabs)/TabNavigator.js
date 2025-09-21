@@ -9,10 +9,12 @@ import {
   StatusBar,
   BackHandler,
   Alert,
+  Pressable,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Main Tabs
 import DashBoardScreen from './DashBoard';
@@ -32,7 +34,7 @@ import Customization from '../screens/Customization';
 import Promotions from '../screens/Promotions';
 import Tickets from '../screens/Tickets';
 import ManageStaff from '../screens/ManageStaff';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Profile from "../screens/Profile"
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -45,6 +47,7 @@ const icons = {
   Analytics: require('../../assets/images/analysis.png'),
   Setting: require('../../assets/images/setting.png'),
   Dropdown: require('../../assets/images/dropdown.png'),
+  Profile: require('../../assets/images/profile.png'),
 };
 
 // Settings Top Tabs
@@ -119,64 +122,79 @@ const SettingsStack = () => {
     'More Settings',
   ];
 
-  const moreOptions = ['Customization', 'Promotions', 'Tickets', 'Manage Staff'];
+  const moreOptions = [
+    'Customization',
+    'Promotions',
+    'Tickets',
+    'Manage Staff',
+  ];
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="SettingsHome" component={({ navigation }) => (
-        <SafeAreaView style={styles.modalContent}>
-          <Text style={styles.modalHeader}>⚙️ Settings</Text>
-          {settingsTabs.map(tab => (
-            <View key={tab}>
-              <TouchableOpacity
-                style={styles.option}
-                onPress={() => {
-                  if (tab === 'More Settings') toggleMoreDropdown();
-                  else if (tab === 'Attributes' || tab === 'Category')
-                    navigation.navigate('SettingsTabs');
-                  else navigation.navigate(tab);
-                }}
-              >
-                <View style={styles.optionContainer}>
-                  <Text style={styles.optionText}>{tab}</Text>
-                  {tab === 'More Settings' && (
-                    <Animated.View
-                      style={{ transform: [{ rotate: rotateIcon }] }}
-                    >
-                      <Image
-                        source={icons['Dropdown']}
-                        style={styles.dropdownIcon}
-                      />
-                    </Animated.View>
-                  )}
-                </View>
-              </TouchableOpacity>
-
-              {tab === 'More Settings' && moreDropdownVisible && (
-                <Animated.View
-                  style={[
-                    styles.dropdownContainer,
-                    { transform: [{ scaleY }], opacity: slideAnim },
-                  ]}
-                >
-                  {moreOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={styles.dropdownOption}
-                      onPress={() => {
-                        setMoreDropdownVisible(false);
-                        navigation.navigate(option);
-                      }}
-                    >
-                      <Text style={styles.dropdownOptionText}>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </Animated.View>
-              )}
+      <Stack.Screen
+        name="SettingsHome"
+        component={({ navigation }) => (
+          <SafeAreaView style={styles.modalContent}>
+            {/* Header row */}
+            <View style={styles.headerRow}>
+              <Text style={styles.modalHeader}>⚙️ Settings</Text>
+              <Pressable onPress={() => navigation.navigate("Profile")}>
+              <Image source={icons.Profile} style={styles.profileImage} />
+              </Pressable>
             </View>
-          ))}
-        </SafeAreaView>
-      )} />
+
+            {settingsTabs.map(tab => (
+              <View key={tab}>
+                <TouchableOpacity
+                  style={styles.option}
+                  onPress={() => {
+                    if (tab === 'More Settings') toggleMoreDropdown();
+                    else if (tab === 'Attributes' || tab === 'Category')
+                      navigation.navigate('SettingsTabs');
+                    else navigation.navigate(tab);
+                  }}
+                >
+                  <View style={styles.optionContainer}>
+                    <Text style={styles.optionText}>{tab}</Text>
+                    {tab === 'More Settings' && (
+                      <Animated.View
+                        style={{ transform: [{ rotate: rotateIcon }] }}
+                      >
+                        <Image
+                          source={icons['Dropdown']}
+                          style={styles.dropdownIcon}
+                        />
+                      </Animated.View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {tab === 'More Settings' && moreDropdownVisible && (
+                  <Animated.View
+                    style={[
+                      styles.dropdownContainer,
+                      { transform: [{ scaleY }], opacity: slideAnim },
+                    ]}
+                  >
+                    {moreOptions.map(option => (
+                      <TouchableOpacity
+                        key={option}
+                        style={styles.dropdownOption}
+                        onPress={() => {
+                          setMoreDropdownVisible(false);
+                          navigation.navigate(option);
+                        }}
+                      >
+                        <Text style={styles.dropdownOptionText}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </Animated.View>
+                )}
+              </View>
+            ))}
+          </SafeAreaView>
+        )}
+      />
       <Stack.Screen name="SettingsTabs" component={SettingsTabs} />
       <Stack.Screen name="Store Information" component={StoreInformation} />
       <Stack.Screen name="Policies" component={Policies} />
@@ -189,6 +207,7 @@ const SettingsStack = () => {
       <Stack.Screen name="Promotions" component={Promotions} />
       <Stack.Screen name="Tickets" component={Tickets} />
       <Stack.Screen name="Manage Staff" component={ManageStaff} />
+      <Stack.Screen name='Profile' component={Profile} />
     </Stack.Navigator>
   );
 };
@@ -298,7 +317,18 @@ const styles = StyleSheet.create({
     padding: 16,
     flex: 1,
   },
-  modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  modalHeader: { fontSize: 18, fontWeight: 'bold', color: '#111' },
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+  },
   option: {
     paddingVertical: 8,
     borderBottomWidth: 1,
