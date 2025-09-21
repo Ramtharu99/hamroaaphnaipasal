@@ -215,16 +215,11 @@ const SettingsStack = () => {
 const TabNavigator = ({ navigation }) => {
   useEffect(() => {
     const backAction = () => {
-      Alert.alert(
-        'Exit App',
-        'Are you sure you want to exit?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Yes', onPress: () => BackHandler.exitApp() },
-        ],
-        { cancelable: true },
-      );
-      return true;
+      if(navigation.canGoBack()){
+        navigation.goBack();
+        return true
+      }
+      return false;
     };
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
