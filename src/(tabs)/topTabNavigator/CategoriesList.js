@@ -10,6 +10,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Switch,
 } from 'react-native';
 
 const CategoryList = () => {
@@ -54,7 +55,7 @@ const CategoryList = () => {
     id: 50,
     name: 150,
     description: 200,
-    status: 100,
+    status: 120,
     createdAt: 120,
     updatedAt: 120,
     actions: 140,
@@ -71,7 +72,6 @@ const CategoryList = () => {
     setFormData({ name: '', description: '', status: 'Active' });
     setModalVisible(true);
   };
-
   const openModalForEdit = item => {
     setEditingId(item.id);
     setFormData({
@@ -87,7 +87,6 @@ const CategoryList = () => {
       Alert.alert('Validation', 'Category name is required.');
       return;
     }
-
     if (editingId) {
       setCategories(prev =>
         prev.map(cat =>
@@ -115,19 +114,14 @@ const CategoryList = () => {
   };
 
   const handleDelete = id => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () =>
-            setCategories(prev => prev.filter(cat => cat.id !== id)),
-        },
-      ],
-    );
+    Alert.alert('Confirm Delete', 'Are you sure you want to delete?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setCategories(prev => prev.filter(cat => cat.id !== id)),
+      },
+    ]);
   };
 
   const renderCategoryItem = ({ item }) => (
@@ -172,7 +166,6 @@ const CategoryList = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.headerRow}>
         <Text style={styles.pageTitle}>Categories</Text>
         <TouchableOpacity style={styles.addButton} onPress={openModalForAdd}>
@@ -180,16 +173,14 @@ const CategoryList = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search Category..."
         value={filterText}
-        placeholderTextColor="gray"
+        placeholderTextColor="#6B7280"
         onChangeText={setFilterText}
       />
 
-      {/* Table */}
       <ScrollView horizontal showsHorizontalScrollIndicator>
         <View style={{ minWidth: totalWidth }}>
           <View style={styles.tableHeader}>
@@ -235,7 +226,6 @@ const CategoryList = () => {
         </View>
       </ScrollView>
 
-      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -247,7 +237,7 @@ const CategoryList = () => {
             <TextInput
               style={styles.modalInput}
               placeholder="Enter category name"
-              placeholderTextColor="gray"
+              placeholderTextColor="#6B7280"
               value={formData.name}
               onChangeText={text => setFormData({ ...formData, name: text })}
             />
@@ -256,7 +246,7 @@ const CategoryList = () => {
             <TextInput
               style={styles.modalInput}
               placeholder="Enter description"
-              placeholderTextColor="gray"
+              placeholderTextColor="#6B7280"
               value={formData.description}
               onChangeText={text =>
                 setFormData({ ...formData, description: text })
@@ -264,32 +254,42 @@ const CategoryList = () => {
             />
 
             <Text style={styles.label}>Status</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Enter status"
-              placeholderTextColor="gray"
-              value={formData.status}
-              onChangeText={text => setFormData({ ...formData, status: text })}
-            />
+            <View style={styles.switchContainer}>
+              <Text style={styles.statusText}>{formData.status}</Text>
+              <Switch
+                trackColor={{ false: '#D1D5DB', true: '#34D399' }}
+                thumbColor={
+                  formData.status === 'Active' ? '#10B981' : '#F3F3F3'
+                }
+                ios_backgroundColor="#D1D5DB"
+                onValueChange={value =>
+                  setFormData({
+                    ...formData,
+                    status: value ? 'Active' : 'Inactive',
+                  })
+                }
+                value={formData.status === 'Active'}
+              />
+            </View>
 
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
-                marginTop: 10,
+                marginTop: 15,
               }}
             >
               <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: '#9CA3AF' }]}
+                style={[styles.modalBtn, { backgroundColor: '#EF4444' }]}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={{ color: '#fff', fontWeight: '600' }}>Cancel</Text>
+                <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#10B981' }]}
                 onPress={handleSave}
               >
-                <Text style={{ color: '#fff', fontWeight: '700' }}>
+                <Text style={styles.buttonText}>
                   {editingId ? 'Update' : 'Save'}
                 </Text>
               </TouchableOpacity>
@@ -304,7 +304,7 @@ const CategoryList = () => {
 export default CategoryList;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -318,13 +318,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 6,
   },
-  addButtonText: { color: '#fff', fontWeight: '600' },
+  addButtonText: { color: '#FFF', fontWeight: '600' },
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 6,
-    padding: 8,
+    padding: 10,
     marginBottom: 10,
+    backgroundColor: '#FFF',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -351,7 +352,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 4,
     marginHorizontal: 2,
-    backgroundColor: 'transparent',
   },
   editText: { color: '#111827', fontSize: 12, fontWeight: '500' },
   deleteBtn: {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginHorizontal: 2,
   },
-  deleteText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  deleteText: { color: '#FFF', fontSize: 12, fontWeight: '600' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     padding: 20,
     borderRadius: 8,
     width: '90%',
@@ -380,13 +380,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 6,
-    padding: 8,
+    padding: 10,
+    marginBottom: 12,
+    backgroundColor: '#F9FAFB',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
+  statusText: { fontSize: 16, fontWeight: '600', color: '#111827' },
   modalBtn: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 6,
     marginLeft: 8,
   },
+  buttonText: { color: '#FFF', fontWeight: '600', textAlign: 'center' },
 });
