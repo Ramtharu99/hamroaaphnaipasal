@@ -44,11 +44,12 @@ const SignIn = ({ navigation }) => {
       email: form.email,
       password: form.password
     }
-
     console.log("signin payload", payload)
 
     try {
       const result = await loginUser(payload)
+      console.log("signin data", result)
+
       console.log("user logedin successfully");
       Alert.alert('Success', 'you are logedin successfully', [
         {text: 'Cancel', style: "cancel"},
