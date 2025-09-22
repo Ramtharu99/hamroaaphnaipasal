@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  Alert,
 } from 'react-native';
 import { useState } from 'react';
 import Checkbox from 'expo-checkbox';
-import { useFormik } from 'formik';
-import { forgotPassValidation } from '../../validation/formvalidation';
 import back from '../../assets/images/back.png';
+import { requestPasswordReset } from '../store/api';
 
 const ForgotPassword = ({ navigation }) => {
   const initialValue = {
@@ -18,14 +18,37 @@ const ForgotPassword = ({ navigation }) => {
   };
 
   const [isChecked, setIsChecked] = useState(false);
+  const [form, setForm] = useState(initialValue);
 
-  const { values, handleChange, handleSubmit, errors, touched } = useFormik({
-    initialValues: initialValue,
-    validationSchema: forgotPassValidation,
-    onSubmit: values => {
-      navigation.navigate('VerifyOtp', values);
-    },
-  });
+  const handleChange = field => value => {
+    setForm(prev => ({...prev, [field]: value}))
+  }
+
+  const handleSubmit = async () => {
+    if(!form.email){
+      Alert.alert("Error", "All fields are required")
+      return
+    }
+    if(!isChecked){
+      Alert.alert("Error", "Please checked the checkbox")
+      return;
+    }
+
+    const payload = {
+      email: form.email
+    }
+
+    console.log("reset password email payload", payload)
+
+    try {
+      const result = await requestPasswordReset(payload)
+      console.log("forgot password", result)
+    } catch (error) {
+      console.log("forgot pasword error: ", error)
+      Alert.alert("Error", "forgot password email")
+    }
+  }
+ 
 
   return (
     <View style={styles.container}>
@@ -54,9 +77,6 @@ const ForgotPassword = ({ navigation }) => {
             onChangeText={handleChange('email')}
             style={styles.inputField}
           />
-          {touched.email && errors.email && (
-            <Text style={styles.errorrmessage}>{errors.email}</Text>
-          )}
 
           {/* checkbox */}
           <View style={styles.checkBoxContainer}>
