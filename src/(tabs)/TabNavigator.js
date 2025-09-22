@@ -6,7 +6,6 @@ import {
   Image,
   StatusBar,
   StyleSheet,
-  BackHandler,
   Animated,
   TouchableOpacity,
   Pressable,
@@ -131,7 +130,7 @@ const SettingsStack = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="SettingsHome"
-        component={({ navigation }) => (
+        component={({navigation}) => (
           <SafeAreaView style={styles.modalContent}>
             <View style={styles.headerRow}>
               <Text style={styles.modalHeader}>⚙️ Settings</Text>

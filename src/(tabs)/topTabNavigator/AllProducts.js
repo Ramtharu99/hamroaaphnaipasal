@@ -9,6 +9,7 @@ import {
   Modal,
   StyleSheet,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -24,6 +25,15 @@ const AllProducts = () => {
     description: '',
     stock: '',
   });
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      console.log("Refreshed");
+      setRefreshing(false)
+    }, 1500)
+  }
 
   useEffect(() => {
     const initialProducts = [
@@ -203,6 +213,9 @@ const AllProducts = () => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
 
       {/* Modal */}
