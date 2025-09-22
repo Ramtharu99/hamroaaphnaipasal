@@ -224,6 +224,7 @@ const TabNavigator = () => {
             paddingTop: 8,
             paddingBottom: 8,
             elevation: 8,
+            marginHorizontal: 8
           },
           tabBarIcon: ({ focused }) => {
             const icon = icons[route.name];

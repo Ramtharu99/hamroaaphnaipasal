@@ -7,12 +7,14 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Image,
+  Alert,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import back from '../../assets/images/back.png';
 import google from '../../assets/images/google.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
+import { loginUser } from '../store/api';
 
 const SignIn = ({ navigation }) => {
   const initialValues = {
@@ -24,8 +26,36 @@ const SignIn = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(initialValues)
 
-  const handleSubmit = () => {
+  const handleChange = field => value => {
+    setForm(prev => ({...prev, [field]: value}))
+  }
 
+  const handleSubmit = async() => {
+    if(!form.email || !form.password){
+      Alert.alert("Error", "All fields are required")
+      return;
+    }
+    if(!isChecked){
+      Alert.alert("Error", "Please checked the checkbox")
+      return;
+    }
+
+    const payload = {
+      email: form.email,
+      password: form.password
+    }
+
+    try {
+      const result = await loginUser(payload)
+      console.log("user logedin successfully");
+      Alert.alert('Success', 'you are logedin successfully', [
+        {text: 'Cancel', style: "cancel"},
+        {text: "Ok", onPress: () => navigation.navigate("DashBoard")}
+      ])
+    } catch (error) {
+      console.log("signin error", error)
+      Alert.alert("Error", "Singin error")
+    }
   }
 
   const handleGoodleSignIn = () => {};
