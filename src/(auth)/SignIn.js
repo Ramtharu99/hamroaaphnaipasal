@@ -9,8 +9,6 @@ import {
   Image,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { useFormik } from 'formik';
-import { loginValidation } from '../../validation/formvalidation';
 import back from '../../assets/images/back.png';
 import google from '../../assets/images/google.png';
 import eye from '../../assets/images/eye.png';
@@ -24,14 +22,11 @@ const SignIn = ({ navigation }) => {
 
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState(initialValues)
 
-  const { values, handleSubmit, handleChange, errors, touched } = useFormik({
-    initialValues,
-    validationSchema: loginValidation,
-    onSubmit: values => {
-      navigation.navigate('DashBoard');
-    },
-  });
+  const handleSubmit = () => {
+
+  }
 
   const handleGoodleSignIn = () => {};
 
@@ -60,12 +55,9 @@ const SignIn = ({ navigation }) => {
             placeholder="example@gmail.com"
             placeholderTextColor={'gray'}
             style={styles.inputField}
-            value={values.email}
+            value={form.email}
             onChangeText={handleChange('email')}
           />
-          {touched.email && errors.email && (
-            <Text style={styles.errorMessage}>{errors.email}</Text>
-          )}
 
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputWrapper}>
@@ -74,7 +66,7 @@ const SignIn = ({ navigation }) => {
               placeholderTextColor={'gray'}
               style={[styles.inputField, {color: "#000"}]}
               secureTextEntry={!showPassword}
-              value={values.password}
+              value={form.password}
               onChangeText={handleChange('password')}
             />
 
@@ -90,10 +82,6 @@ const SignIn = ({ navigation }) => {
               />
             </TouchableOpacity>
           </View>
-
-          {touched.password && errors.password && (
-            <Text style={styles.errorMessage}>{errors.password}</Text>
-          )}
 
           {/* remember me and forgot password */}
           <View style={styles.rememberMeAndForgot}>

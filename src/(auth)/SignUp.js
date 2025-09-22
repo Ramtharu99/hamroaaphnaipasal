@@ -7,32 +7,84 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Image,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { useFormik } from 'formik';
-import { signUpValidation } from '../../validation/formvalidation';
 import back from '../../assets/images/back.png';
 import google from '../../assets/images/google.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
+import { registerUser } from '../store/api';
 
 const SignUp = ({ navigation }) => {
   const initialValue = {
-    siteName: '',
+    sitename: '',
     email: '',
     password: '',
+    confirmPassword: '',
+    captchaChecked: false,
+    acceptTerms: false,   
   };
 
-  const [isChecked, setIsChecked] = useState(false);
+  const [form, setForm] = useState(initialValue);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { values, handleChange, handleSubmit, errors, touched } = useFormik({
-    initialValues: initialValue,
-    validationSchema: signUpValidation,
-    onSubmit: values => {
-      console.log('form data', values);
-    },
-  });
+  const handleChange = field => value => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !form.sitename ||
+      !form.email ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
+      Alert.alert('Error', 'All fields are required');
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+    if (!form.captchaChecked) {
+      Alert.alert('Error', 'Please verify you are not a robot');
+      return;
+    }
+    if (!form.acceptTerms) {
+      Alert.alert('Error', 'You must accept the terms and conditions');
+      return;
+    }
+
+    const payload = {
+      site_name: form.sitename.concat('.hamroaaphnaipasl.com'),
+      email: form.email,
+      password: form.password,
+      accept_term: true, 
+    };
+
+    console.log('Signup payload:', payload);
+    setLoading(true);
+
+    try {
+      const result = await registerUser(payload);
+      console.log('Signup response:', result);
+
+      Alert.alert('Success', 'Account created successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('SignIn') },
+      ]);
+    } catch (err) {
+      console.log('Signup error:', err);
+      let errorMessage = 'Signup failed';
+      if (err && err.message) errorMessage = err.message;
+      Alert.alert('Signup Failed', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -40,7 +92,6 @@ const SignUp = ({ navigation }) => {
         <Text style={styles.title}>Register</Text>
         <Text style={styles.subtitle}>Sign up to your Store Owner account</Text>
 
-        {/* Back button */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
@@ -52,40 +103,35 @@ const SignUp = ({ navigation }) => {
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
-        {/* input Fields */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Site name</Text>
+          {/* Site Name */}
+          <Text style={styles.label}>Site Name</Text>
           <TextInput
-            placeholder="example                        .hamroaaphnaipasal"
+            placeholder="Your site name"
             style={styles.inputField}
-            placeholderTextColor={"gray"}
-            value={values.siteName}
-            onChangeText={handleChange('siteName')}
+            placeholderTextColor="gray"
+            value={form.sitename}
+            onChangeText={handleChange('sitename')}
           />
-          {touched.siteName && errors.siteName && (
-            <Text style={styles.errormessage}>{errors.siteName}</Text>
-          )}
 
+          {/* Email */}
           <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="example@gmail.com"
             style={styles.inputField}
-            value={values.email}
-            placeholderTextColor={"gray"}
+            value={form.email}
+            placeholderTextColor="gray"
             onChangeText={handleChange('email')}
           />
-          {touched.email && errors.email && (
-            <Text style={styles.errormessage}>{errors.email}</Text>
-          )}
 
+          {/* Password */}
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputWrapper}>
             <TextInput
               placeholder="**********"
-              style={[styles.inputField, {color: "#000"}]}
+              style={[styles.inputField, { color: '#000' }]}
               secureTextEntry={!showPassword}
-              value={values.password}
-              placeholderTextColor={"gray"}
+              value={form.password}
               onChangeText={handleChange('password')}
             />
             <TouchableOpacity
@@ -95,53 +141,74 @@ const SignUp = ({ navigation }) => {
               <Image
                 source={showPassword ? eye : eyeOff}
                 style={{ width: 25, height: 25 }}
-                tintColor={'#6B7280'}
-                resizeMode="contain"
+                tintColor="#6B7280"
               />
             </TouchableOpacity>
           </View>
-          {touched.password && errors.password && (
-            <Text style={styles.errormessage}>{errors.password}</Text>
-          )}
 
-          {/* Check box */}
+          {/* Confirm Password */}
+          <Text style={styles.label}>Confirm Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              placeholder="**********"
+              style={[styles.inputField, { color: '#000' }]}
+              secureTextEntry={!showConfirmPassword}
+              value={form.confirmPassword}
+              onChangeText={handleChange('confirmPassword')}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowConfirmPassword(prev => !prev)}
+            >
+              <Image
+                source={showConfirmPassword ? eye : eyeOff}
+                style={{ width: 25, height: 25 }}
+                tintColor="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Captcha Checkbox */}
           <View style={styles.checkboxContainer}>
             <Checkbox
-              value={isChecked}
-              onValueChange={setIsChecked}
-              color={isChecked ? '#1BB83A' : undefined}
+              value={form.captchaChecked}
+              onValueChange={handleChange('captchaChecked')}
+              color={form.captchaChecked ? '#1BB83A' : undefined}
+            />
+            <Text style={styles.checkboxText}>I am not a robot</Text>
+          </View>
+
+          {/* Terms & Conditions Checkbox */}
+          <View style={styles.checkboxContainer}>
+            <Checkbox
+              value={form.acceptTerms}
+              onValueChange={handleChange('acceptTerms')}
+              color={form.acceptTerms ? '#1BB83A' : undefined}
             />
             <Text style={styles.checkboxText}>
-              I read & agree to{' '}
+              I agree to the{' '}
               <Text
                 style={{ textDecorationLine: 'underline' }}
-                onPress={() => navigation.navigate('PrivacyPolicy')}
               >
-                privacy policy
-              </Text>{' '}
-              and{' '}
-              <Text
-                style={{ textDecorationLine: 'underline' }}
-                onPress={() => navigation.navigate('TermsAndCondition')}
-              >
-                Terms and conditions
+                terms and conditions
               </Text>
             </Text>
           </View>
 
-          {/* sign up button */}
-          <TouchableOpacity style={styles.continueBtn} onPress={handleSubmit}>
-            <Text style={styles.continueText}>Sign up</Text>
+          {/* Sign Up Button */}
+          <TouchableOpacity
+            style={styles.continueBtn}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="gray" />
+            ) : (
+              <Text style={styles.continueText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
 
-          {/* divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.line} />
-            <Text style={styles.dividerText}>Or continue with</Text>
-            <View style={styles.line} />
-          </View>
-
-          {/* social buttons */}
+          {/* Google Sign Up */}
           <View style={styles.socialContainer}>
             <TouchableOpacity style={styles.socialBtn}>
               <Image
@@ -149,12 +216,12 @@ const SignUp = ({ navigation }) => {
                 style={{ height: 25, width: 25 }}
                 resizeMode="contain"
               />
-              <Text style={styles.socialText}>Google</Text>
+              <Text style={styles.socialText}>Continue with Google</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Signup link inside card */}
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
@@ -168,6 +235,7 @@ const SignUp = ({ navigation }) => {
 
 export default SignUp;
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -205,25 +273,14 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 20,
   },
-  backButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 4,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 10,
-  },
+  backButtonText: { fontSize: 14, color: '#6B7280', marginLeft: 4 },
+  inputContainer: { width: '100%', marginBottom: 10 },
   inputWrapper: {
     position: 'relative',
     width: '100%',
     justifyContent: 'center',
   },
-  label: {
-    fontSize: 14,
-    color: '#000',
-    marginVertical: 8,
-  },
+  label: { fontSize: 14, color: '#000', marginVertical: 8 },
   inputField: {
     padding: 14,
     backgroundColor: '#fff',
@@ -234,11 +291,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingRight: 40,
   },
-  eyeButton: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-  },
+  eyeButton: { position: 'absolute', right: 12, top: 12 },
   continueBtn: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -249,27 +302,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  continueText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 20,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D9D9D9',
-  },
-  dividerText: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginHorizontal: 8,
-  },
+  continueText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   socialContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -288,11 +321,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1BB83A',
   },
-  socialText: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '600',
-  },
+  socialText: { fontSize: 14, color: '#374151', fontWeight: '600' },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -307,13 +336,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: 'wrap',
   },
-  errormessage: {
-    color: 'red',
-    marginTop: 4,
-    marginBottom: 2,
-    textAlign: 'left',
-    fontSize: 12,
-  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -321,10 +343,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     marginBottom: 4,
   },
-  footerText: {
-    fontSize: 14,
-    color: '#374151',
-  },
+  footerText: { fontSize: 14, color: '#374151' },
   signupText: {
     textDecorationLine: 'underline',
     fontSize: 14,

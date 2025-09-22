@@ -138,7 +138,6 @@ const SettingsStack = () => {
               <Image source={icons.Profile} style={styles.profileImage} />
               </Pressable>
             </View>
-
             {settingsTabs.map(tab => (
               <View key={tab}>
                 <TouchableOpacity
