@@ -45,6 +45,8 @@ const SignIn = ({ navigation }) => {
       password: form.password
     }
 
+    console.log("signin payload", payload)
+
     try {
       const result = await loginUser(payload)
       console.log("user logedin successfully");
