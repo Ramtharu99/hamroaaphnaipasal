@@ -9,8 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import { useState, useRef } from 'react';
-import { useFormik } from 'formik';
-import { otpValidation } from '../../validation/formvalidation';
 import back from '../../assets/images/back.png';
 import { verifyOTP } from '../store/api';
 
@@ -57,7 +55,9 @@ const VerifyOtp = ({ navigation }) => {
     }
   };
 
-  const resendotp = () => {};
+  const resendotp = () => {
+    console.log("Resend OTP")
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container}>
