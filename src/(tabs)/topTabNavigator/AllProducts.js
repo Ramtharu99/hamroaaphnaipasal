@@ -109,7 +109,7 @@ const AllProducts = () => {
       Alert.alert('Validation', 'Please select an image!');
       return;
     }
-    
+
     if (editIndex !== null) {
       const updated = [...products];
       updated[editIndex] = newProduct;
@@ -202,7 +202,7 @@ const AllProducts = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Text style={styles.headerTitle}>All Products</Text>
+        <Text style={styles.headerTitle}>📦 All Products</Text>
         <TouchableOpacity
           style={styles.addButtonSide}
           onPress={() => {
@@ -328,7 +328,7 @@ const AllProducts = () => {
 export default AllProducts;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, padding: 10, backgroundColor: "#E7EEE6" },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

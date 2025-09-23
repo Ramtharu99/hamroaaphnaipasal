@@ -170,7 +170,7 @@ const CategoryList = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.pageTitle}>Categories</Text>
+        <Text style={styles.pageTitle}>🏷️ Categories</Text>
         <TouchableOpacity style={styles.addButton} onPress={openModalForAdd}>
           <Text style={styles.addButtonText}>+ Add Category</Text>
         </TouchableOpacity>
@@ -305,7 +305,7 @@ const CategoryList = () => {
 export default CategoryList;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, padding: 10, backgroundColor: '#E7EEE6' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#111827',
     paddingVertical: 6,
   },
   cell: { paddingHorizontal: 4, fontSize: 12, color: '#111827' },

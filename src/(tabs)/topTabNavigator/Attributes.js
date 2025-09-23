@@ -217,7 +217,7 @@ const Attributes = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.pageTitle}>Attributes</Text>
+        <Text style={styles.pageTitle}>🎨 Attributes</Text>
         <TouchableOpacity style={styles.addButton} onPress={openModalForAdd}>
           <Text style={styles.addButtonText}>+ Add Attribute</Text>
         </TouchableOpacity>
@@ -380,7 +380,7 @@ const Attributes = () => {
 export default Attributes;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 10, backgroundColor: '#E7EEE6' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -401,6 +401,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 8,
     marginBottom: 10,
+    backgroundColor: "#fff"
   },
   tableHeader: {
     flexDirection: 'row',
@@ -416,7 +417,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#111827',
     paddingVertical: 6,
   },
   cell: { paddingHorizontal: 4, fontSize: 12, color: '#111827' },
