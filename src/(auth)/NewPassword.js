@@ -1,43 +1,68 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  KeyboardAvoidingView, 
-  StyleSheet, 
-  TouchableOpacity, 
-  TextInput, 
+import {
+  View,
+  Text,
+  KeyboardAvoidingView,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
   Image,
-  Platform 
+  Platform,
+  Alert,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { useFormik } from 'formik';
-import { passwordChangeValidation } from '../../validation/formvalidation';
 
 // assets
 import back from '../../assets/images/back.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
+import { newPassword } from '../store/api';
 
 const NewPassword = ({ navigation }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [form, setForm] = useState(initialValues);
 
   const initialValues = {
-    password: '',
-    confirmPass: '',
+    newPassword: '',
+    confirmPassword: '',
   };
 
-  const { values, handleChange, handleSubmit, errors } = useFormik({
-    initialValues,
-    validationSchema: passwordChangeValidation,
-    onSubmit: () => {
-      navigation.navigate('SignIn');
-    },
-  });
+  const handleChange = field => value => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (!form.newPassword || !form.confirmPass) {
+      Alert.alert('Error', 'All fields are required');
+      return;
+    }
+    if (!isChecked) {
+      Alert.alert('Error', 'Confirm you are not a robot');
+      return;
+    }
+
+    const payload = {
+      NewPassword: form.newPassword,
+      confirmPassword: form.confirmPassword,
+    };
+
+    try {
+      const result = await newPassword(payload);
+      console.log('password reset successfull', result);
+      Alert.alert('Success', 'Password reset successfull', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Ok', onPress: () => navigation.navigate('SignIn') },
+      ]);
+    } catch (error) {
+      console.log('Error', error);
+      Alert.alert('Failed to reset password');
+    }
+  };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -46,7 +71,7 @@ const NewPassword = ({ navigation }) => {
         <Text style={styles.subtitle}>Enter strong password</Text>
 
         {/* Back button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
@@ -59,14 +84,14 @@ const NewPassword = ({ navigation }) => {
           <Text style={styles.label}>New Password</Text>
           <View style={styles.inputWrapper}>
             <TextInput
-              placeholder="••••••••"
+              placeholder="New password"
               placeholderTextColor="#9CA3AF"
               secureTextEntry={!showPassword}
               value={values.password}
               onChangeText={handleChange('password')}
               style={styles.inputField}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.eyeButton}
               onPress={() => setShowPassword(prev => !prev)}
             >
@@ -76,9 +101,6 @@ const NewPassword = ({ navigation }) => {
               />
             </TouchableOpacity>
           </View>
-          {errors.password && (
-            <Text style={styles.errorMessage}>{errors.password}</Text>
-          )}
         </View>
 
         {/* Confirm Password */}
@@ -86,14 +108,14 @@ const NewPassword = ({ navigation }) => {
           <Text style={styles.label}>Confirm Password</Text>
           <View style={styles.inputWrapper}>
             <TextInput
-              placeholder="••••••••"
+              placeholder="Confirm password"
               placeholderTextColor="#9CA3AF"
               secureTextEntry={!showConfirmPassword}
               value={values.confirmPass}
               onChangeText={handleChange('confirmPass')}
               style={styles.inputField}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.eyeButton}
               onPress={() => setShowConfirmPassword(prev => !prev)}
             >
@@ -125,7 +147,7 @@ const NewPassword = ({ navigation }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?{" "}</Text>
+          <Text style={styles.footerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.signupText}> Signup here</Text>
           </TouchableOpacity>
@@ -167,7 +189,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: 18,
     textAlign: 'center',
-    width: "100%"
+    width: '100%',
   },
   backButton: {
     flexDirection: 'row',
@@ -184,7 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginLeft: 4,
-    width: 100
+    width: 100,
   },
   inputContainer: {
     width: '100%',

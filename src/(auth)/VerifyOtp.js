@@ -6,25 +6,39 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Image,
+  Alert,
 } from 'react-native';
 import { useState, useRef } from 'react';
 import { useFormik } from 'formik';
 import { otpValidation } from '../../validation/formvalidation';
-import back from "../../assets/images/back.png";
+import back from '../../assets/images/back.png';
+import { verifyOTP } from '../store/api';
 
 const VerifyOtp = ({ navigation }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef([]);
 
-  const { errors, handleSubmit, setFieldValue, submitCount } = useFormik({
-    initialValues: { otp: '' },
-    validationSchema: otpValidation,
-    onSubmit: values => {
-      if (values !== null) {
-        navigation.navigate('NewPassword');
-      }
-    },
-  });
+  const handleSubmit = async () => {
+    if (!otp) {
+      Alert.alert('Error', 'Enter otp');
+    }
+
+    const payload = {
+      otp,
+    };
+    console.log('OTP code', payload);
+    try {
+      const result = await verifyOTP(payload);
+      console.log('OTP verified', result);
+      Alert.alert('Success', 'OTP verified', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Ok', onPress: () => navigation.navigate('NewPassword') },
+      ]);
+    } catch (error) {
+      console.log('Error', error);
+      Alert.alert('Error', 'verification failed');
+    }
+  };
 
   const handleChange = (text, index) => {
     if (/^\d?$/.test(text)) {
@@ -43,10 +57,6 @@ const VerifyOtp = ({ navigation }) => {
     }
   };
 
-  // const handleVerify = () => {
-  //   navigation.navigate('NewPassword');
-  // };
-
   const resendotp = () => {};
 
   return (
@@ -62,7 +72,10 @@ const VerifyOtp = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image source={back} style={{height: 18, width: 18, tintColor: "#6B7280"}} />
+          <Image
+            source={back}
+            style={{ height: 18, width: 18, tintColor: '#6B7280' }}
+          />
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
@@ -77,12 +90,11 @@ const VerifyOtp = ({ navigation }) => {
               maxLength={1}
               value={value}
               onChangeText={text => handleChange(text, index)}
+              placeholder="0"
+              placeholderTextColor="gray"
             />
           ))}
         </View>
-        {submitCount > 0 && errors.otp && (
-          <Text style={styles.errorMessage}>{errors.otp}</Text>
-        )}
 
         {/* verify button */}
         <TouchableOpacity style={styles.verifyButton} onPress={handleSubmit}>
@@ -91,7 +103,7 @@ const VerifyOtp = ({ navigation }) => {
 
         {/* footer link */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Didn't receive OTP?{" "}</Text>
+          <Text style={styles.footerText}>Didn't receive OTP? </Text>
           <TouchableOpacity onPress={resendotp}>
             <Text style={styles.footerLink}> Resend</Text>
           </TouchableOpacity>
@@ -126,14 +138,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 8,
-    textAlign: "center"
+    textAlign: 'center',
   },
   subTitle: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 18,
     textAlign: 'center',
-    width: "100%"
+    width: '100%',
   },
   backButton: {
     flexDirection: 'row',
