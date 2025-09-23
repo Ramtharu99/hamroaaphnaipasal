@@ -226,6 +226,7 @@ const Customization = ({ navigation }) => {
           placeholder={`Search ${activeTab.toLowerCase()}...`}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholderTextColor="gray"
         />
         <Text style={styles.pagination}>
           Showing 1 to {filteredData.length} of {getCurrentData().length}{' '}
