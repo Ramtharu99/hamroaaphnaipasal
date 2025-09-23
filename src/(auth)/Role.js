@@ -59,12 +59,12 @@ const Role = ({ navigation }) => {
         {/* Footer link */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't have an account? {" "}
+            Don't have an account? {' '}
             <Text
               style={styles.signupText}
               onPress={() => navigation.push('SignUp')}
             >
-              Signup here
+              Signup here{' '}
             </Text>
           </Text>
         </View>

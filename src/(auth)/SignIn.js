@@ -125,7 +125,7 @@ const SignIn = ({ navigation }) => {
                 color={isChecked ? '#1BB83A' : undefined}
                 style={{height: 20, width: 20}}
               />
-              <Text style={styles.rememberText}>Remember me</Text>
+              <Text style={styles.rememberText}>Remember me{' '}</Text>
             </View>
 
             <TouchableOpacity
