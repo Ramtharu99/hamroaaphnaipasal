@@ -25,15 +25,15 @@ const AllProducts = () => {
     description: '',
     stock: '',
   });
-  const [refreshing, setRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      console.log("Refreshed");
-      setRefreshing(false)
-    }, 1500)
-  }
+      console.log('Refreshed');
+      setRefreshing(false);
+    }, 1500);
+  };
 
   useEffect(() => {
     const initialProducts = [
@@ -53,26 +53,11 @@ const AllProducts = () => {
         description: 'Noise-canceling',
         stock: '300',
       },
-      {
-        id: '3',
-        name: 'Laptop Pro',
-        price: '$1299.99',
-        imageUrl: '',
-        description: 'High-performance',
-        stock: '75',
-      },
-      {
-        id: '4',
-        name: 'Smart Watch',
-        price: '$199.99',
-        imageUrl: '',
-        description: 'Fitness tracking',
-        stock: '200',
-      },
     ];
     setProducts(initialProducts);
   }, []);
 
+  // Pick Image
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo' }, response => {
       if (!response.didCancel && !response.errorCode) {
@@ -81,12 +66,50 @@ const AllProducts = () => {
     });
   };
 
-  const handleSave = () => {
-    if (!newProduct.name) {
+  const saveProductToBackend = async product => {
+    try {
+      const response = await fetch('https://your-api-url.com/products', {
+        method: editIndex !== null ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save product');
+      }
+
+      const data = await response.json();
+      console.log('Backend response:', data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Something went wrong while saving to backend.');
+    }
+  };
+
+  // Save Product
+  const handleSave = async () => {
+    if (!newProduct.name.trim()) {
       Alert.alert('Validation', 'Product name is required!');
       return;
     }
-
+    if (!newProduct.price.trim()) {
+      Alert.alert('Validation', 'Product price is required!');
+      return;
+    }
+    if (!newProduct.description.trim()) {
+      Alert.alert('Validation', 'Product description is required!');
+      return;
+    }
+    if (!newProduct.stock.trim()) {
+      Alert.alert('Validation', 'Product stock is required!');
+      return;
+    }
+    if (!newProduct.imageUrl) {
+      Alert.alert('Validation', 'Please select an image!');
+      return;
+    }
+    
     if (editIndex !== null) {
       const updated = [...products];
       updated[editIndex] = newProduct;
@@ -97,6 +120,8 @@ const AllProducts = () => {
         { ...newProduct, id: (prev.length + 1).toString() },
       ]);
     }
+
+    await saveProductToBackend(newProduct);
 
     setModalVisible(false);
     setEditIndex(null);
@@ -155,7 +180,6 @@ const AllProducts = () => {
         <Text style={styles.cardText}>Description: {item.description}</Text>
         <Text style={styles.cardText}>Stock: {item.stock}</Text>
 
-        {/* Buttons below the content */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.editButton}
@@ -230,44 +254,44 @@ const AllProducts = () => {
             <TextInput
               style={styles.input}
               value={newProduct.name}
-              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, name: text }))
               }
               placeholder="Enter product name"
+              placeholderTextColor="gray"
             />
 
             <Text style={styles.label}>Price</Text>
             <TextInput
               style={styles.input}
               value={newProduct.price}
-              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, price: text }))
               }
               placeholder="Enter price"
+              placeholderTextColor="gray"
             />
 
             <Text style={styles.label}>Description</Text>
             <TextInput
               style={styles.input}
-              placeholderTextColor="gray"
               value={newProduct.description}
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, description: text }))
               }
               placeholder="Enter description"
+              placeholderTextColor="gray"
             />
 
             <Text style={styles.label}>Stock</Text>
             <TextInput
               style={styles.input}
               value={newProduct.stock}
-              placeholderTextColor="gray"
               onChangeText={text =>
                 setNewProduct(prev => ({ ...prev, stock: text }))
               }
               placeholder="Enter stock quantity"
+              placeholderTextColor="gray"
             />
 
             <Text style={styles.label}>Image</Text>
@@ -305,7 +329,6 @@ export default AllProducts;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: '#F9FAFB' },
-
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -320,7 +343,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   addButtonText: { color: '#fff', fontWeight: '600' },
-
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -329,7 +351,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#fff',
   },
-
   card: {
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -341,7 +362,6 @@ const styles = StyleSheet.create({
   productImage: { width: 80, height: 80, borderRadius: 8, marginRight: 10 },
   cardContent: { flex: 1 },
   cardText: { fontSize: 14, color: '#374151', marginBottom: 4 },
-
   buttonRow: {
     flexDirection: 'row',
     marginTop: 10,
@@ -362,7 +382,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteButtonText: { color: '#fff', fontWeight: '600' },
-
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -390,7 +409,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#F9FAFB',
   },
-
   imagePickerButton: {
     backgroundColor: '#3B82F6',
     padding: 10,
@@ -399,7 +417,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagePickerText: { color: '#fff', fontWeight: '600' },
-
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',

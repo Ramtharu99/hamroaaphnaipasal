@@ -55,7 +55,7 @@ const CategoryList = () => {
     id: 50,
     name: 150,
     description: 200,
-    status: 120,
+    status: 150,
     createdAt: 120,
     updatedAt: 120,
     actions: 140,
@@ -72,6 +72,7 @@ const CategoryList = () => {
     setFormData({ name: '', description: '', status: 'Active' });
     setModalVisible(true);
   };
+
   const openModalForEdit = item => {
     setEditingId(item.id);
     setFormData({
@@ -133,9 +134,11 @@ const CategoryList = () => {
       <Text style={[styles.cell, { width: columnWidths.description }]}>
         {item.description}
       </Text>
-      <Text style={[styles.cell, { width: columnWidths.status }]}>
-        {item.status}
-      </Text>
+      <View style={[styles.cell, { width: columnWidths.status }]}>
+        <Text style={{ fontSize: 12, color: '#374151', marginTop: 4 }}>
+          {item.status}
+        </Text>
+      </View>
       <Text style={[styles.cell, { width: columnWidths.createdAt }]}>
         {item.createdAt}
       </Text>
@@ -182,7 +185,7 @@ const CategoryList = () => {
       />
 
       <ScrollView
-        horizontal={true}
+        horizontal
         showsHorizontalScrollIndicator
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -229,6 +232,7 @@ const CategoryList = () => {
         </View>
       </ScrollView>
 
+      {/* Modal for Add/Edit */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -274,13 +278,8 @@ const CategoryList = () => {
                 value={formData.status === 'Active'}
               />
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                marginTop: 15,
-              }}
-            >
+
+            <View style={styles.modalBtnRow}>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#EF4444' }]}
                 onPress={() => setModalVisible(false)}
@@ -393,6 +392,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statusText: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  modalBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 15,
+  },
   modalBtn: {
     paddingVertical: 10,
     paddingHorizontal: 16,

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Switch,
 } from 'react-native';
 
 const Attributes = () => {
@@ -49,7 +50,7 @@ const Attributes = () => {
     type: '',
     variant: '',
     filter: '',
-    status: '',
+    status: 'Active',
   });
 
   const columnWidths = {
@@ -62,16 +63,14 @@ const Attributes = () => {
     filter: 100,
     status: 120,
     created: 150,
-    actions: 140,
+    actions: 150,
   };
 
   const totalWidth = Object.values(columnWidths).reduce((a, b) => a + b, 0);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1500);
+    setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
   const openModalForAdd = () => {
@@ -83,7 +82,7 @@ const Attributes = () => {
       type: '',
       variant: '',
       filter: '',
-      status: '',
+      status: 'Active',
     });
     setModalVisible(true);
   };
@@ -103,43 +102,31 @@ const Attributes = () => {
   };
 
   const handleSave = () => {
-    if (!formData.attribute) {
+    if (!formData.attribute.trim()) {
       Alert.alert('Validation', 'Attribute name is required.');
       return;
     }
 
+    const newAttribute = {
+      id: editingId ? editingId : (attributes.length + 1).toString(),
+      class: formData.class,
+      attribute: formData.attribute,
+      values: formData.values.split(',').map(v => v.trim()),
+      type: formData.type,
+      variant: formData.variant,
+      filter: formData.filter,
+      status: formData.status,
+      created: editingId
+        ? attributes.find(attr => attr.id === editingId).created
+        : new Date().toISOString().split('T')[0],
+    };
+
     if (editingId) {
       setAttributes(prev =>
-        prev.map(attr =>
-          attr.id === editingId
-            ? {
-                ...attr,
-                class: formData.class,
-                attribute: formData.attribute,
-                values: formData.values.split(',').map(v => v.trim()),
-                type: formData.type,
-                variant: formData.variant,
-                filter: formData.filter,
-                status: formData.status,
-              }
-            : attr,
-        ),
+        prev.map(attr => (attr.id === editingId ? newAttribute : attr)),
       );
     } else {
-      setAttributes(prev => [
-        ...prev,
-        {
-          id: (prev.length + 1).toString(),
-          class: formData.class,
-          attribute: formData.attribute,
-          values: formData.values.split(',').map(v => v.trim()),
-          type: formData.type,
-          variant: formData.variant,
-          filter: formData.filter,
-          status: formData.status,
-          created: new Date().toISOString().split('T')[0],
-        },
-      ]);
+      setAttributes(prev => [...prev, newAttribute]);
     }
 
     setModalVisible(false);
@@ -170,9 +157,22 @@ const Attributes = () => {
       <Text style={[styles.cell, { width: columnWidths.attribute }]}>
         {item.attribute}
       </Text>
-      <Text style={[styles.cell, { width: columnWidths.values }]}>
-        {item.values.join(', ')}
-      </Text>
+      <View
+        style={[
+          styles.cell,
+          {
+            width: columnWidths.values,
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+          },
+        ]}
+      >
+        {item.values.map((val, index) => (
+          <Text key={index} style={styles.valueBadge}>
+            {val}
+          </Text>
+        ))}
+      </View>
       <Text style={[styles.cell, { width: columnWidths.type }]}>
         {item.type}
       </Text>
@@ -191,7 +191,11 @@ const Attributes = () => {
       <View
         style={[
           styles.cell,
-          { width: columnWidths.actions, flexDirection: 'row' },
+          {
+            width: columnWidths.actions,
+            flexDirection: 'row',
+            justifyContent: 'center',
+          },
         ]}
       >
         <TouchableOpacity
@@ -212,7 +216,6 @@ const Attributes = () => {
 
   return (
     <View style={styles.container}>
-      {/* Title and Button Row */}
       <View style={styles.headerRow}>
         <Text style={styles.pageTitle}>Attributes</Text>
         <TouchableOpacity style={styles.addButton} onPress={openModalForAdd}>
@@ -220,7 +223,6 @@ const Attributes = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Filter Search */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search Attribute..."
@@ -229,7 +231,6 @@ const Attributes = () => {
         onChangeText={setFilterText}
       />
 
-      {/* Horizontal Scroll (Table) */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator
@@ -238,7 +239,6 @@ const Attributes = () => {
         }
       >
         <View style={{ minWidth: totalWidth }}>
-          {/* Header */}
           <View style={styles.tableHeader}>
             <Text style={[styles.headerCell, { width: columnWidths.id }]}>
               #
@@ -274,7 +274,6 @@ const Attributes = () => {
             </Text>
           </View>
 
-          {/* FlatList */}
           <FlatList
             data={attributes.filter(attr =>
               attr.attribute.toLowerCase().includes(filterText.toLowerCase()),
@@ -285,7 +284,6 @@ const Attributes = () => {
         </View>
       </ScrollView>
 
-      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -305,8 +303,8 @@ const Attributes = () => {
             <Text style={styles.label}>Attribute</Text>
             <TextInput
               style={styles.modalInput}
-              placeholderTextColor="gray"
               placeholder="Enter attribute"
+              placeholderTextColor="gray"
               value={formData.attribute}
               onChangeText={text =>
                 setFormData({ ...formData, attribute: text })
@@ -316,8 +314,8 @@ const Attributes = () => {
             <Text style={styles.label}>Values (comma separated)</Text>
             <TextInput
               style={styles.modalInput}
-              placeholderTextColor="gray"
               placeholder="e.g. Red, Blue, Green"
+              placeholderTextColor="gray"
               value={formData.values}
               onChangeText={text => setFormData({ ...formData, values: text })}
             />
@@ -325,31 +323,49 @@ const Attributes = () => {
             <Text style={styles.label}>Type</Text>
             <TextInput
               style={styles.modalInput}
-              placeholderTextColor="gray"
               placeholder="Enter type"
+              placeholderTextColor="gray"
               value={formData.type}
               onChangeText={text => setFormData({ ...formData, type: text })}
             />
 
-            {/* Save and Cancel Buttons */}
+            <Text style={styles.label}>Status</Text>
+            <View style={styles.switchContainer}>
+              <Text style={styles.statusText}>{formData.status}</Text>
+              <Switch
+                trackColor={{ false: '#D1D5DB', true: '#34D399' }}
+                thumbColor={
+                  formData.status === 'Active' ? '#10B981' : '#F3F3F3'
+                }
+                ios_backgroundColor="#D1D5DB"
+                onValueChange={value =>
+                  setFormData({
+                    ...formData,
+                    status: value ? 'Active' : 'Inactive',
+                  })
+                }
+                value={formData.status === 'Active'}
+              />
+            </View>
+
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
-                marginTop: 10,
+                marginTop: 15,
               }}
             >
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#EF4444' }]}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={{ color: '#fff', fontWeight: '600' }}>Cancel</Text>
+                <Text style={styles.modalBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#10B981' }]}
                 onPress={handleSave}
               >
-                <Text style={{ color: '#fff', fontWeight: '700' }}>
+                <Text style={styles.modalBtnText}>
                   {editingId ? 'Update' : 'Save'}
                 </Text>
               </TouchableOpacity>
@@ -365,7 +381,6 @@ export default Attributes;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: '#fff' },
-
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -373,7 +388,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   pageTitle: { fontSize: 20, fontWeight: 'bold', color: '#111827' },
-
   addButton: {
     backgroundColor: '#10B981',
     paddingVertical: 8,
@@ -381,7 +395,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   addButtonText: { color: '#fff', fontWeight: '600' },
-
   searchInput: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -389,7 +402,6 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 10,
   },
-
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#C8E6C9',
@@ -401,7 +413,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     fontSize: 12,
   },
-
   row: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -409,27 +420,43 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   cell: { paddingHorizontal: 4, fontSize: 12, color: '#111827' },
-
-  editBtn: {
-    borderWidth: 1,
-    borderColor: '#9CA3AF',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+  valueBadge: {
+    backgroundColor: '#42A5F5',
+    color: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 4,
+    marginBottom: 2,
     borderRadius: 4,
-    marginHorizontal: 2,
-    backgroundColor: 'transparent',
+    fontSize: 12,
   },
-  editText: { color: '#111827', fontSize: 12, fontWeight: '500' },
-
+  editBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginHorizontal: 2,
+    borderColor: "gray",
+    borderWidth: 2
+  },
+  editText: {
+    color: '#000',
+    fontWeight: '600',
+    fontSize: 12,
+    textAlign: 'center',
+  },
   deleteBtn: {
     backgroundColor: '#EF4444',
     paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
     marginHorizontal: 2,
   },
-  deleteText: { color: '#fff', fontSize: 12, fontWeight: '600' },
-
+  deleteText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,
+    textAlign: 'center',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -451,10 +478,18 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 12,
   },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  statusText: { fontSize: 16, fontWeight: '600', color: '#111827' },
   modalBtn: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 6,
     marginLeft: 8,
   },
+  modalBtnText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
 });
