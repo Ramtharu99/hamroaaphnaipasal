@@ -15,6 +15,7 @@ import google from '../../assets/images/google.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
 import { loginUser } from '../store/api';
+import { useRoute } from '@react-navigation/native';
 
 const SignIn = ({ navigation }) => {
   const initialValues = {
@@ -25,13 +26,15 @@ const SignIn = ({ navigation }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(initialValues)
+  const router = useRoute();
+  const selectedRole = router.params?.role;
 
   const handleChange = field => value => {
     setForm(prev => ({...prev, [field]: value}))
   }
 
   const handleSubmit = async() => {
-    if(!form.email || !form.password){
+    if(!form.email.trim() || !form.password.trim()){
       Alert.alert("Error", "All fields are required")
       return;
     }
@@ -40,21 +43,26 @@ const SignIn = ({ navigation }) => {
       return;
     }
 
+    let roleLabel = selectedRole === 1 ? "Owner" : selectedRole === 2 ? "Staff" : null
+
     const payload = {
       email: form.email,
-      password: form.password
+      password: form.password,
+      role: roleLabel,
+      rememberMe: isChecked
     }
     console.log("signin payload", payload)
 
     try {
       const result = await loginUser(payload)
       console.log("signin data", result)
-
       console.log("user logedin successfully");
-      Alert.alert('Success', 'you are logedin successfully', [
-        {text: 'Cancel', style: "cancel"},
-        {text: "Ok", onPress: () => navigation.navigate("DashBoard")}
-      ])
+      if(result.success){
+        navigation.reset({
+          index: 0,
+          routes: [{name: "DashBoard"}]
+        })
+      }
     } catch (error) {
       console.log("signin error", error)
       Alert.alert("Error", "Singin error")
@@ -158,7 +166,7 @@ const SignIn = ({ navigation }) => {
                 style={{ width: 25, height: 25 }}
                 resizeMode="contain"
               />
-              <Text style={styles.socialText}>Google</Text>
+              <Text style={styles.socialText}>Continue with Google</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,4 +1,5 @@
 import { config } from './config';
+import AsyncStorage  from "@react-native-async-storage/async-storage"
 
 export async function registerUser(data) {
   try {
@@ -47,7 +48,7 @@ export async function loginUser(data) {
 
     const result = await response.json();
     if (result.access_token) {
-      localStorage.setItem('access_token', result.access_token);
+      await AsyncStorage.setItem('access_token', result.access_token)
     }
     return result;
   } catch (error) {
@@ -90,6 +91,7 @@ export async function requestPasswordReset(data) {
   }
 }
 
+// for forgeting password otp verification 
 export async function verifyOTP(data) {
   try {
     const response = await fetch(`${config.apiBaseUrl}/reset-password`, {
@@ -118,7 +120,7 @@ export async function verifyOTP(data) {
   }
 }
 
-export async function newPassword(data) {
+export async function updatePassword(data) {
   try {
     const response = await fetch(`${config.apiBaseUrl}/confirm-password`, {
       method: 'POST',

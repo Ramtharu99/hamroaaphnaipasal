@@ -15,6 +15,10 @@ const Role = ({ navigation }) => {
     { id: 2, label: 'Staff', icon: people },
   ];
 
+  const handlerRole = () => {
+    navigation.navigate("SignIn", {role: selectedRole})
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
@@ -44,7 +48,7 @@ const Role = ({ navigation }) => {
 
         {/* Continue button */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('SignIn')}
+          onPress={handlerRole}
           style={[
             styles.continueBtn,
             !selectedRole && styles.continueBtnDisabled,

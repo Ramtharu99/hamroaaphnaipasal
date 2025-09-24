@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   BackHandler,
   TouchableOpacity,
   ScrollView,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import backButton from "../../assets/images/arrow-back.png";
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import backButton from '../../assets/images/arrow-back.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = ({ navigation }) => {
   useEffect(() => {
@@ -22,38 +24,54 @@ const Profile = ({ navigation }) => {
     };
 
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
+      'hardwareBackPress',
+      backAction,
     );
     return () => backHandler.remove();
   }, []);
 
   // Dummy user data
   const user = {
-    name: "Sanjog Khatri",
-    email: "sanjog@example.com",
-    phone: "+977 9812345678",
-    address: "Kathmandu, Nepal",
-    avatar: "https://i.pravatar.cc/150?img=3",
+    name: 'Sanjog Khatri',
+    email: 'sanjog@example.com',
+    phone: '+977 9812345678',
+    address: 'Kathmandu, Nepal',
+    avatar: 'https://i.pravatar.cc/150?img=3',
   };
 
   const handleProfileEdit = () => {
-    console.log("Profile edit button clicked!");
+    console.log('Profile edit button clicked!');
   };
 
   const handleLogout = () => {
-    console.log("Logout successfully!");
+    Alert.alert('Logout', 'Are you sure want to logout', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          AsyncStorage.removeItem('access_token');
+          navigation.getParent().reset({
+            index:0,
+            routes: [{name: "Role"}]
+          })
+        }
+      },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Header */}
       <View style={styles.topHeader}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Image source={backButton} style={styles.backIcon} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
-        <View style={{ width: 24 }} /> 
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
@@ -84,7 +102,7 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E7EEE6",
+    backgroundColor: '#E7EEE6',
   },
   topHeader: {
     flexDirection: 'row',
@@ -108,16 +126,16 @@ const styles = StyleSheet.create({
   backIcon: {
     width: 24,
     height: 24,
-    resizeMode: "contain",
+    resizeMode: 'contain',
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#111",
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 20,
     marginBottom: 30,
   },
@@ -129,12 +147,12 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#111",
+    fontWeight: 'bold',
+    color: '#111',
   },
   email: {
     fontSize: 14,
-    color: "#555",
+    color: '#555',
     marginTop: 4,
   },
   actions: {
@@ -142,19 +160,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   button: {
-    backgroundColor: "#1BB83A",
+    backgroundColor: '#1BB83A',
     paddingVertical: 14,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 12,
   },
   logoutButton: {
-    backgroundColor: "#E63946",
+    backgroundColor: '#E63946',
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 15,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
 

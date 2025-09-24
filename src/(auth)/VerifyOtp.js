@@ -11,30 +11,50 @@ import {
 import { useState, useRef } from 'react';
 import back from '../../assets/images/back.png';
 import { verifyOTP } from '../store/api';
+import { useRoute } from '@react-navigation/native';
 
 const VerifyOtp = ({ navigation }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef([]);
+  const route = useRoute();
 
   const handleSubmit = async () => {
-    if (!otp) {
-      Alert.alert('Error', 'Enter otp');
+    const otpCode = otp.join('').trim();
+    const email = route.params.email?.trim().toLowerCase();
+
+    if (!email) {
+      Alert.alert('Error', 'Email not found. Go back and try again.');
+      return;
     }
 
-    const payload = {
-      otp,
-    };
-    console.log('OTP code', payload);
+    if (otpCode.length !== 6) {
+      Alert.alert('Error', 'Please enter all 6 digits of the OTP');
+      return;
+    }
+
     try {
+      console.log('Verifying OTP for email:', email, 'with code:', otpCode);
+      const payload = { email, code: Number(otpCode) };
       const result = await verifyOTP(payload);
-      console.log('OTP verified', result);
-      Alert.alert('Success', 'OTP verified', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Ok', onPress: () => navigation.navigate('NewPassword') },
-      ]);
+      console.log('OTP verification result:', result);
+
+      if (result.success) {
+        Alert.alert('Success', 'OTP verified successfully!', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('SetNewPassword', {
+                email,
+                code: Number(otpCode),
+              }),
+          },
+        ]);
+      } else {
+        Alert.alert('Error', result.message || 'OTP verification failed');
+      }
     } catch (error) {
-      console.log('Error', error);
-      Alert.alert('Error', 'verification failed');
+      console.error('OTP verification error:', error);
+      Alert.alert('Error', error.message || 'OTP verification failed');
     }
   };
 
@@ -44,19 +64,12 @@ const VerifyOtp = ({ navigation }) => {
       newOtp[index] = text;
       setOtp(newOtp);
 
-      setFieldValue('otp', newOtp.join(''));
-
-      if (text && index < otp.length - 1) {
-        inputRefs.current[index + 1].focus();
-      }
-      if (!text && index > 0) {
-        inputRefs.current[index - 1].focus();
-      }
+      if (text && index < otp.length - 1) inputRefs.current[index + 1].focus();
+      if (!text && index > 0) inputRefs.current[index - 1].focus();
     }
   };
 
-  const resendotp = () => {
-    console.log("Resend OTP")
+  const resendOtp = () => {
   };
 
   return (
@@ -67,7 +80,7 @@ const VerifyOtp = ({ navigation }) => {
           Enter the 6-digit OTP sent to your email
         </Text>
 
-        {/* back button */}
+        {/* Back button */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
@@ -79,7 +92,7 @@ const VerifyOtp = ({ navigation }) => {
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
-        {/* OTP inputs */}
+        {/* OTP Inputs */}
         <View style={styles.otpContainer}>
           {otp.map((value, index) => (
             <TextInput
@@ -96,15 +109,15 @@ const VerifyOtp = ({ navigation }) => {
           ))}
         </View>
 
-        {/* verify button */}
+        {/* Verify Button */}
         <TouchableOpacity style={styles.verifyButton} onPress={handleSubmit}>
           <Text style={styles.verifyText}>Verify OTP</Text>
         </TouchableOpacity>
 
-        {/* footer link */}
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Didn't receive OTP? </Text>
-          <TouchableOpacity onPress={resendotp}>
+          <TouchableOpacity onPress={resendOtp}>
             <Text style={styles.footerLink}> Resend</Text>
           </TouchableOpacity>
         </View>
@@ -153,11 +166,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 32,
   },
-  backButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 4,
-  },
+  backButtonText: { fontSize: 14, color: '#6B7280', marginLeft: 4 },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -182,30 +191,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  verifyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
+  verifyText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  footerText: {
-    fontSize: 14,
-    color: '#374151',
-  },
+  footerText: { fontSize: 14, color: '#374151' },
   footerLink: {
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
-  },
-  errorMessage: {
-    color: '#EF4444',
-    marginBottom: 8,
-    textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '500',
   },
 });

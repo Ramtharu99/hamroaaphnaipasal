@@ -16,48 +16,49 @@ import Checkbox from 'expo-checkbox';
 import back from '../../assets/images/back.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
-import { newPassword } from '../store/api';
+import { updatePassword } from '../store/api';
 
-const NewPassword = ({ navigation }) => {
+const SetNewPassword = ({ navigation, route }) => {
+  const { email, code } = route.params; // get email & code from VerifyOtp screen
+
+  const initialValues = { newPassword: '', confirmPassword: '' };
+  const [form, setForm] = useState(initialValues);
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [form, setForm] = useState(initialValues);
 
-  const initialValues = {
-    newPassword: '',
-    confirmPassword: '',
-  };
-
-  const handleChange = field => value => {
+  const handleChange = field => value =>
     setForm(prev => ({ ...prev, [field]: value }));
-  };
 
   const handleSubmit = async () => {
-    if (!form.newPassword || !form.confirmPass) {
+    const { newPassword, confirmPassword } = form;
+
+    if (!newPassword || !confirmPassword) {
       Alert.alert('Error', 'All fields are required');
       return;
     }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
     if (!isChecked) {
       Alert.alert('Error', 'Confirm you are not a robot');
       return;
     }
 
-    const payload = {
-      NewPassword: form.newPassword,
-      confirmPassword: form.confirmPassword,
-    };
-
     try {
-      const result = await newPassword(payload);
-      console.log('password reset successfull', result);
-      Alert.alert('Success', 'Password reset successfull', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Ok', onPress: () => navigation.navigate('SignIn') },
+      const payload = { email, code, newPassword }; 
+      const result = await updatePassword(payload);
+
+      console.log('Password reset success:', result);
+      Alert.alert('Success', 'Password reset successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('Role') },
       ]);
     } catch (error) {
-      console.log('Error', error);
-      Alert.alert('Failed to reset password');
+      console.error('Password reset error:', error);
+      Alert.alert('Failed to reset password', error.message);
     }
   };
 
@@ -87,8 +88,8 @@ const NewPassword = ({ navigation }) => {
               placeholder="New password"
               placeholderTextColor="#9CA3AF"
               secureTextEntry={!showPassword}
-              value={values.password}
-              onChangeText={handleChange('password')}
+              value={form.newPassword}
+              onChangeText={handleChange('newPassword')}
               style={styles.inputField}
             />
             <TouchableOpacity
@@ -111,8 +112,8 @@ const NewPassword = ({ navigation }) => {
               placeholder="Confirm password"
               placeholderTextColor="#9CA3AF"
               secureTextEntry={!showConfirmPassword}
-              value={values.confirmPass}
-              onChangeText={handleChange('confirmPass')}
+              value={form.confirmPassword}
+              onChangeText={handleChange('confirmPassword')}
               style={styles.inputField}
             />
             <TouchableOpacity
@@ -125,9 +126,6 @@ const NewPassword = ({ navigation }) => {
               />
             </TouchableOpacity>
           </View>
-          {errors.confirmPass && (
-            <Text style={styles.errorMessage}>{errors.confirmPass}</Text>
-          )}
         </View>
 
         {/* Checkbox */}
@@ -157,7 +155,7 @@ const NewPassword = ({ navigation }) => {
   );
 };
 
-export default NewPassword;
+export default SetNewPassword;
 
 const styles = StyleSheet.create({
   container: {
@@ -197,31 +195,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 20,
   },
-  backIcon: {
-    height: 18,
-    width: 18,
-    tintColor: '#6B7280',
-  },
-  backButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 4,
-    width: 100,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 10,
-  },
+  backIcon: { height: 18, width: 18, tintColor: '#6B7280' },
+  backButtonText: { fontSize: 14, color: '#6B7280', marginLeft: 4 },
+  inputContainer: { width: '100%', marginBottom: 10 },
   inputWrapper: {
     position: 'relative',
     width: '100%',
     justifyContent: 'center',
   },
-  label: {
-    fontSize: 14,
-    color: '#000',
-    marginVertical: 10,
-  },
+  label: { fontSize: 14, color: '#000', marginVertical: 10 },
   inputField: {
     padding: 14,
     backgroundColor: '#fff',
@@ -233,11 +215,7 @@ const styles = StyleSheet.create({
     paddingRight: 40,
     color: '#000',
   },
-  eyeButton: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-  },
+  eyeButton: { position: 'absolute', right: 12, top: 12 },
   eyeIcon: {
     width: 25,
     height: 25,
@@ -250,11 +228,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignSelf: 'flex-start',
   },
-  rememberText: {
-    fontSize: 12,
-    color: '#000',
-    marginLeft: 8,
-  },
+  rememberText: { fontSize: 12, color: '#000', marginLeft: 8 },
   continueBtn: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -265,18 +239,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  continueText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  errorMessage: {
-    color: 'red',
-    marginTop: 4,
-    marginBottom: 2,
-    textAlign: 'left',
-    fontSize: 12,
-  },
+  continueText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -284,10 +247,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     marginBottom: 4,
   },
-  footerText: {
-    fontSize: 14,
-    color: '#374151',
-  },
+  footerText: { fontSize: 14, color: '#374151' },
   signupText: {
     textDecorationLine: 'underline',
     fontSize: 14,
