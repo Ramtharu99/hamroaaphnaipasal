@@ -49,7 +49,6 @@ const DashBoard = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <Text style={styles.heading}>Overview of your e-commerce performance</Text>
-
         <View style={styles.cardRow}>
           <CommerceCard
             cardColor="#C8E6C9"
@@ -68,7 +67,6 @@ const DashBoard = () => {
             isNegative={true}
           />
         </View>
-
         <View style={styles.cardRow}>
           <CommerceCard
             cardColor="#FFF9C4"
@@ -87,7 +85,6 @@ const DashBoard = () => {
             isNegative={true}
           />
         </View>
-
         {/* Product Component */}
         <View>
           <Product />

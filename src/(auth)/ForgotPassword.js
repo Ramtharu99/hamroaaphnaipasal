@@ -6,6 +6,7 @@ import {
   TextInput,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useState } from 'react';
 import Checkbox from 'expo-checkbox';
@@ -16,18 +17,24 @@ const ForgotPassword = ({ navigation }) => {
   const initialValue = { email: '' };
   const [isChecked, setIsChecked] = useState(false);
   const [form, setForm] = useState(initialValue);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = field => value => {
     setForm(prev => ({ ...prev, [field]: value }));
+    setError('');
   };
 
   const sendOtp = async () => {
+    setLoading(true);
     if (!form.email) {
-      Alert.alert('Error', 'Email is required');
+      setError('Email is reuired');
+      setLoading(false);
       return;
     }
     if (!isChecked) {
-      Alert.alert('Error', 'Please confirm you are not a robot');
+      setError('Please verify you are not a robot');
+      setLoading(false);
       return;
     }
 
@@ -35,22 +42,15 @@ const ForgotPassword = ({ navigation }) => {
       const payload = { email: form.email, captchaChecked: isChecked };
       const result = await requestPasswordReset(payload);
 
-      console.log('Password reset request result:', result);
-
       if (result.success) {
-        Alert.alert('Success', 'OTP sent to your email!', [
-          {
-            text: 'OK',
-            onPress: () =>
-              navigation.navigate('VerifyOtp', { email: form.email }),
-          },
-        ]);
+        navigation.navigate('VerifyOtp', { email: form.email });
       } else {
-        Alert.alert('Error', result.message || 'Failed to send OTP');
+        setError('Invalid Credential');
       }
     } catch (error) {
-      console.error('Forgot password error:', error);
-      Alert.alert('Error', 'Failed to send OTP');
+      setError('Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,14 +74,21 @@ const ForgotPassword = ({ navigation }) => {
 
         {/* input field */}
         <View style={styles.inputContainer}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            </View>
+          ) : null}
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="example@gmail.com"
             value={form.email}
             onChangeText={handleChange('email')}
-            style={styles.inputField}
+            style={[styles.inputField, error && { borderColor: 'red' }]}
             keyboardType="email-address"
             autoCapitalize="none"
+            placeholderTextColor="gray"
           />
 
           {/* checkbox */}
@@ -94,8 +101,16 @@ const ForgotPassword = ({ navigation }) => {
             <Text style={styles.robotText}>I am not a robot</Text>
           </View>
 
-          <TouchableOpacity style={styles.resetPassword} onPress={sendOtp}>
-            <Text style={styles.resetText}>Reset password</Text>
+          <TouchableOpacity
+            style={styles.resetPassword}
+            onPress={sendOtp}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="gray" />
+            ) : (
+              <Text style={styles.resetText}>Reset password</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.footerContainer}>
@@ -160,6 +175,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#000',
   },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 5,
+    borderLeftColor: '#DC2626',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   label: { fontSize: 14, color: '#000' },
   inputField: {
     padding: 14,
@@ -169,6 +197,7 @@ const styles = StyleSheet.create({
     borderColor: '#1BB83A',
     borderWidth: 1,
     width: '100%',
+    color: '#000',
   },
   checkBoxContainer: {
     flexDirection: 'row',

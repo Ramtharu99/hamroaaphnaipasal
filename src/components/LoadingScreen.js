@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Image, Animated, StyleSheet } from 'react-native';
 import logo from '../../assets/images/logo.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoaderScreen = ({ navigation }) => {
   const animation = useRef(new Animated.Value(0)).current;
@@ -17,10 +18,15 @@ const LoaderScreen = ({ navigation }) => {
       useNativeDriver: false,
     });
 
-    anim.start(() => {
-      // navigation.replace('DashBoard'); 
-      navigation.replace('Role'); 
+    anim.start(async() => {
 
+      const token = await AsyncStorage.getItem('access_token');
+      if (token) {
+        navigation.replace('DashBoard'); 
+        
+      }else{
+        navigation.replace('Role'); 
+      }
     });
 
     return () => anim.stop();

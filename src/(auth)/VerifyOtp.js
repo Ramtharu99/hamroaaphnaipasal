@@ -6,55 +6,65 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Image,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import back from '../../assets/images/back.png';
-import { verifyOTP } from '../store/api';
+import { OTP } from '../store/api';
 import { useRoute } from '@react-navigation/native';
 
 const VerifyOtp = ({ navigation }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [countdown, setCountdown] = useState(30);
   const inputRefs = useRef([]);
   const route = useRoute();
 
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [countdown]);
+
   const handleSubmit = async () => {
+    setLoading(true);
+    setSuccessMessage(''); 
     const otpCode = otp.join('').trim();
     const email = route.params.email?.trim().toLowerCase();
 
     if (!email) {
-      Alert.alert('Error', 'Email not found. Go back and try again.');
+      setError('Email is missing');
+      setLoading(false);
       return;
     }
 
     if (otpCode.length !== 6) {
-      Alert.alert('Error', 'Please enter all 6 digits of the OTP');
+      setError('Please enter all 6 digits of the OTP');
+      setLoading(false);
       return;
     }
 
     try {
-      console.log('Verifying OTP for email:', email, 'with code:', otpCode);
       const payload = { email, code: Number(otpCode) };
-      const result = await verifyOTP(payload);
-      console.log('OTP verification result:', result);
+      const result = await OTP(payload);
 
       if (result.success) {
-        Alert.alert('Success', 'OTP verified successfully!', [
-          {
-            text: 'OK',
-            onPress: () =>
-              navigation.navigate('SetNewPassword', {
-                email,
-                code: Number(otpCode),
-              }),
-          },
-        ]);
+        setError('');
+        navigation.navigate('SetNewPassword', { email, code: Number(otpCode) });
       } else {
-        Alert.alert('Error', result.message || 'OTP verification failed');
+        setError(result.message || 'Invalid OTP');
       }
     } catch (error) {
       console.error('OTP verification error:', error);
-      Alert.alert('Error', error.message || 'OTP verification failed');
+      setError(error.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,13 +73,41 @@ const VerifyOtp = ({ navigation }) => {
       const newOtp = [...otp];
       newOtp[index] = text;
       setOtp(newOtp);
+      setError('');
+      setSuccessMessage(''); 
 
       if (text && index < otp.length - 1) inputRefs.current[index + 1].focus();
       if (!text && index > 0) inputRefs.current[index - 1].focus();
     }
   };
 
-  const resendOtp = () => {
+  const resendOtp = async () => {
+    const email = route.params.email?.trim().toLowerCase();
+    if (!email) {
+      setError('Email is missing');
+      return;
+    }
+
+    setLoading(true);
+    setSuccessMessage(''); 
+    try {
+      const payload = { email, resend: true }; 
+      const result = await OTP(payload);
+
+      if (result.success) {
+        setError('');
+        setSuccessMessage('OTP resent successfully');
+        setOtp(['', '', '', '', '', '']); 
+        setCountdown(30);
+      } else {
+        setError(result.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      setError(error.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,33 +130,66 @@ const VerifyOtp = ({ navigation }) => {
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
-        {/* OTP Inputs */}
-        <View style={styles.otpContainer}>
-          {otp.map((value, index) => (
-            <TextInput
-              key={index}
-              ref={ref => (inputRefs.current[index] = ref)}
-              style={styles.otpInput}
-              keyboardType="numeric"
-              maxLength={1}
-              value={value}
-              onChangeText={text => handleChange(text, index)}
-              placeholder="0"
-              placeholderTextColor="gray"
-            />
-          ))}
+        {/* Input Container */}
+        <View style={styles.inputContainer}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            </View>
+          ) : null}
+          {successMessage ? (
+            <View style={styles.successBox}>
+              <Text style={styles.successText}>✅ {successMessage}</Text>
+            </View>
+          ) : null}
+
+          {/* OTP Inputs */}
+          <View style={styles.otpContainer}>
+            {otp.map((value, index) => (
+              <TextInput
+                key={index}
+                ref={ref => (inputRefs.current[index] = ref)}
+                style={[styles.otpInput, error && { borderColor: 'red' }]}
+                keyboardType="numeric"
+                maxLength={1}
+                value={value}
+                onChangeText={text => handleChange(text, index)}
+                placeholder="0"
+                placeholderTextColor="gray"
+                editable={!loading}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Verify Button */}
-        <TouchableOpacity style={styles.verifyButton} onPress={handleSubmit}>
-          <Text style={styles.verifyText}>Verify OTP</Text>
+        <TouchableOpacity
+          style={[styles.verifyButton, loading && { opacity: 0.7 }]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.verifyText}>Verify OTP</Text>
+          )}
         </TouchableOpacity>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Didn't receive OTP? </Text>
-          <TouchableOpacity onPress={resendOtp}>
-            <Text style={styles.footerLink}> Resend</Text>
+          <TouchableOpacity
+            onPress={resendOtp}
+            disabled={loading || countdown > 0}
+          >
+            <Text
+              style={[
+                styles.footerLink,
+                (loading || countdown > 0) && { opacity: 0.7 },
+              ]}
+            >
+              {countdown > 0 ? `Resend in ${countdown}s` : 'Resend'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -164,13 +235,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   backButtonText: { fontSize: 14, color: '#6B7280', marginLeft: 4 },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 5,
+    borderLeftColor: '#DC2626',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  successBox: {
+    backgroundColor: '#D1FAE5',
+    borderLeftWidth: 5,
+    borderLeftColor: '#10B981',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  successText: {
+    color: '#047857',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   otpContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    justifyContent: 'center',
+    gap: 10,
+    width: '100%',
     marginBottom: 20,
   },
   otpInput: {
@@ -182,25 +284,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     backgroundColor: '#fff',
+    color: '#000',
   },
   verifyButton: {
     backgroundColor: '#1BB83A',
     paddingVertical: 14,
     borderRadius: 12,
-    width: '80%',
+    width: '100%',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   verifyText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 18,
   },
   footerText: { fontSize: 14, color: '#374151' },
   footerLink: {
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
+    color: '#3851DD',
   },
 });

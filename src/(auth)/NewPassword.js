@@ -8,7 +8,7 @@ import {
   TextInput,
   Image,
   Platform,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
 
@@ -19,46 +19,56 @@ import eyeOff from '../../assets/images/eye-off.png';
 import { updatePassword } from '../store/api';
 
 const SetNewPassword = ({ navigation, route }) => {
-  const { email, code } = route.params; // get email & code from VerifyOtp screen
+  const { email, code } = route.params;
 
   const initialValues = { newPassword: '', confirmPassword: '' };
   const [form, setForm] = useState(initialValues);
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = field => value =>
+  const handleChange = field => value => {
     setForm(prev => ({ ...prev, [field]: value }));
+    setError('');
+  };
 
   const handleSubmit = async () => {
+    setLoading(true);
     const { newPassword, confirmPassword } = form;
 
     if (!newPassword || !confirmPassword) {
-      Alert.alert('Error', 'All fields are required');
+      setError('All fields are required');
+      setLoading(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setError('Passwords do not match');
+      setLoading(false);
       return;
     }
 
     if (!isChecked) {
-      Alert.alert('Error', 'Confirm you are not a robot');
+      setError('Confirm you are not a robot');
+      setLoading(false);
       return;
     }
 
     try {
-      const payload = { email, code, newPassword }; 
+      const payload = { email, code, newPassword };
       const result = await updatePassword(payload);
 
-      console.log('Password reset success:', result);
-      Alert.alert('Success', 'Password reset successfully!', [
-        { text: 'OK', onPress: () => navigation.navigate('Role') },
-      ]);
+      if (result.success) {
+        navigation.navigate('Role');
+        setLoading(false);
+      } else {
+        setError('Invalid credential');
+        setLoading(false);
+      }
     } catch (error) {
-      console.error('Password reset error:', error);
-      Alert.alert('Failed to reset password', error.message);
+      setError('Something went wrong');
     }
   };
 
@@ -77,11 +87,16 @@ const SetNewPassword = ({ navigation, route }) => {
           onPress={() => navigation.navigate('SignIn')}
         >
           <Image source={back} style={styles.backIcon} />
-          <Text style={styles.backButtonText}>Back to login</Text>
+          <Text style={styles.backButtonText}>Back to login </Text>
         </TouchableOpacity>
 
         {/* New Password */}
         <View style={styles.inputContainer}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            </View>
+          ) : null}
           <Text style={styles.label}>New Password</Text>
           <View style={styles.inputWrapper}>
             <TextInput
@@ -90,7 +105,7 @@ const SetNewPassword = ({ navigation, route }) => {
               secureTextEntry={!showPassword}
               value={form.newPassword}
               onChangeText={handleChange('newPassword')}
-              style={styles.inputField}
+              style={[styles.inputField, error && { borderColor: 'red' }]}
             />
             <TouchableOpacity
               style={styles.eyeButton}
@@ -114,7 +129,7 @@ const SetNewPassword = ({ navigation, route }) => {
               secureTextEntry={!showConfirmPassword}
               value={form.confirmPassword}
               onChangeText={handleChange('confirmPassword')}
-              style={styles.inputField}
+              style={[styles.inputField, error && { borderColor: 'red' }]}
             />
             <TouchableOpacity
               style={styles.eyeButton}
@@ -140,7 +155,11 @@ const SetNewPassword = ({ navigation, route }) => {
 
         {/* Reset Password Button */}
         <TouchableOpacity style={styles.continueBtn} onPress={handleSubmit}>
-          <Text style={styles.continueText}>Reset Password</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="gray" />
+          ) : (
+            <Text style={styles.continueText}>Reset Password</Text>
+          )}
         </TouchableOpacity>
 
         {/* Footer */}
@@ -197,6 +216,19 @@ const styles = StyleSheet.create({
   },
   backIcon: { height: 18, width: 18, tintColor: '#6B7280' },
   backButtonText: { fontSize: 14, color: '#6B7280', marginLeft: 4 },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 5,
+    borderLeftColor: '#DC2626',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   inputContainer: { width: '100%', marginBottom: 10 },
   inputWrapper: {
     position: 'relative',

@@ -19,28 +19,37 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const checkLogin = async () => {
+    const checkLoginStatus = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('access_token');
-        setToken(storedToken);
+        if (storedToken) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
       } catch (error) {
-        console.log('Error checking token:', error);
+        console.log('Error checking login status:', error);
       } finally {
-        setTimeout(() => setLoading(false), 2000);
+        // Give some time for splash/loading screen
+        setTimeout(() => setLoading(false), 1500);
       }
     };
 
-    checkLogin();
+    checkLoginStatus();
   }, []);
+
+  if (loading) {
+    return <LoaderScreen />;
+  }
 
   return (
     <NavigationContainer>
       {Platform.OS === 'android' && (
         <StatusBar
-          barStyle="dark-content"
+          barStyle="light-content"
           backgroundColor="#1BB83A"
           translucent={false}
         />
@@ -50,21 +59,23 @@ const App = () => {
       )}
 
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {loading && (
-          <Stack.Screen name="LoaderScreen" component={LoaderScreen} />
+        {isLoggedIn ? (
+          // 🔹 User is logged in
+          <>
+            <Stack.Screen name="DashBoard" component={DashBoard} />
+            <Stack.Screen name="Profile" component={Profile} />
+          </>
+        ) : (
+          // 🔹 User is not logged in
+          <>
+            <Stack.Screen name="Role" component={Role} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+            <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
+            <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
+          </>
         )}
-
-        {/* Auth flow */}
-        <Stack.Screen name="Role" component={Role} />
-        <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="SignIn" component={SignIn} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-        <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
-        <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
-
-        {/* App flow */}
-        <Stack.Screen name="DashBoard" component={DashBoard} />
-        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

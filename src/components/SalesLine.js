@@ -8,7 +8,6 @@ import {
   ScrollView,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
 const chartHeight = 220;
 const barWidth = 30;
 
@@ -104,24 +103,24 @@ export default SalesOverview;
 const styles = StyleSheet.create({
   chartContainer: {
     marginVertical: 20,
-    backgroundColor: '#F0FDF4',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
+    // backgroundColor: '#F0FDF4',
+    // padding: 16,
+    // borderRadius: 12,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 3 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 6,
+    // elevation: 5,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#065F46',
+    // color: '#065F46',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
-    color: '#10B981',
+    // color: '#10B981',
     marginBottom: 16,
   },
   chart: {

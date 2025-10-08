@@ -33,7 +33,7 @@ const Profile = ({ navigation }) => {
   // Dummy user data
   const user = {
     name: 'Sanjog Khatri',
-    email: 'sanjog@example.com',
+    email: 'sanjog@example.com ',
     phone: '+977 9812345678',
     address: 'Kathmandu, Nepal',
     avatar: 'https://i.pravatar.cc/150?img=3',

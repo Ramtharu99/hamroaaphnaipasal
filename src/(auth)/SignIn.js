@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import back from '../../assets/images/back.png';
@@ -16,6 +17,11 @@ import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
 import { loginUser } from '../store/api';
 import { useRoute } from '@react-navigation/native';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import { googleClientId } from '../store/config';
 
 const SignIn = ({ navigation }) => {
   const initialValues = {
@@ -25,51 +31,109 @@ const SignIn = ({ navigation }) => {
 
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState(initialValues)
+  const [form, setForm] = useState(initialValues);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRoute();
   const selectedRole = router.params?.role;
 
-  const handleChange = field => value => {
-    setForm(prev => ({...prev, [field]: value}))
-  }
-
-  const handleSubmit = async() => {
-    if(!form.email.trim() || !form.password.trim()){
-      Alert.alert("Error", "All fields are required")
+  const handleSubmit = async () => {
+    setLoading(true);
+    if (!form.email || !form.password) {
+      setError('All fields are required');
+      setLoading(false);
       return;
     }
-    if(!isChecked){
-      Alert.alert("Error", "Please checked the checkbox")
+    if (!isChecked) {
+      setError('Please check the checkbox');
+      setLoading(false);
       return;
     }
-
-    let roleLabel = selectedRole === 1 ? "Owner" : selectedRole === 2 ? "Staff" : null
-
-    const payload = {
-      email: form.email,
-      password: form.password,
-      role: roleLabel,
-      rememberMe: isChecked
-    }
-    console.log("signin payload", payload)
 
     try {
-      const result = await loginUser(payload)
-      console.log("signin data", result)
-      console.log("user logedin successfully");
-      if(result.success){
+      let roleLabel =
+        selectedRole === 1 ? 'Owner' : selectedRole === 2 ? 'Staff' : null;
+
+      const payload = {
+        email: form.email,
+        password: form.password,
+        role: roleLabel,
+        rememberMe: isChecked,
+      };
+
+      const result = await loginUser(payload);
+
+      if (result.success) {
+        setError('');
         navigation.reset({
           index: 0,
-          routes: [{name: "DashBoard"}]
-        })
+          routes: [{ name: 'DashBoard' }],
+        });
+        setLoading(false)
+      } else {
+        setError(result.message || 'Invalid credentials');
+        setLoading(false)
       }
     } catch (error) {
-      console.log("signin error", error)
-      Alert.alert("Error", "Singin error")
+      console.log('Error', error);
+      setError('Invalid credential');
+      setLoading(false)
+    }finally{
+      setLoading(false)
     }
-  }
+  };
 
-  const handleGoodleSignIn = () => {};
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: googleClientId.clientId,
+      offlineAccess: false,
+    });
+  }, []);
+
+
+  // signin with google
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+
+      const userInfo = await GoogleSignin.signIn();
+      const email = userInfo.user.email;
+      const password = userInfo.user.id;
+
+      const roleLabel =
+        selectedRole === 1 ? 'Owner' : selectedRole === 2 ? 'Staff' : null;
+
+      const payload = {
+        email,
+        password,
+        role: roleLabel,
+        rememberMe: true,
+      };
+
+      const result = await loginUser(payload);
+
+      if (result.success) {
+        setError('');
+        navigation.reset({ index: 0, routes: [{ name: 'DashBoard' }] });
+      } else {
+        setError(result.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      console.log('Google Sign-In Error:', error);
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        setError('Google sign-in cancelled by user');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        setError('Google sign-in already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setError('Google Play Services not available or outdated');
+      } else {
+        setError('Google sign-in failed');
+      }
+    } 
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -91,13 +155,21 @@ const SignIn = ({ navigation }) => {
 
         {/* input Fields */}
         <View style={styles.inputContainer}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            </View>
+          ) : null}
           <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="example@gmail.com"
             placeholderTextColor={'gray'}
-            style={styles.inputField}
+            style={[styles.inputField, error && { borderColor: 'red' }]}
             value={form.email}
-            onChangeText={handleChange('email')}
+            onChangeText={text => {
+              setForm(prev => ({ ...prev, email: text }));
+              setError('');
+            }}
           />
 
           <Text style={styles.label}>Password</Text>
@@ -105,10 +177,13 @@ const SignIn = ({ navigation }) => {
             <TextInput
               placeholder="Enter your password"
               placeholderTextColor={'gray'}
-              style={[styles.inputField, {color: "#000"}]}
+              style={[styles.inputField, error && { borderColor: 'red' }]}
               secureTextEntry={!showPassword}
               value={form.password}
-              onChangeText={handleChange('password')}
+              onChangeText={text => {
+                setForm(prev => ({ ...prev, password: text }));
+                setError('');
+              }}
             />
 
             <TouchableOpacity
@@ -131,9 +206,9 @@ const SignIn = ({ navigation }) => {
                 value={isChecked}
                 onValueChange={setIsChecked}
                 color={isChecked ? '#1BB83A' : undefined}
-                style={{height: 20, width: 20}}
+                style={{ height: 20, width: 20 }}
               />
-              <Text style={styles.rememberText}>Remember me{' '}</Text>
+              <Text style={styles.rememberText}>Remember me </Text>
             </View>
 
             <TouchableOpacity
@@ -144,8 +219,16 @@ const SignIn = ({ navigation }) => {
           </View>
 
           {/* sign in button */}
-          <TouchableOpacity style={styles.continueBtn} onPress={handleSubmit}>
-            <Text style={styles.continueText}>Sign in</Text>
+          <TouchableOpacity
+            style={[styles.continueBtn, loading && {opacity: 0.7}]}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size='small' color="gray" />
+            ) : (
+              <Text style={styles.continueText}>Sign in</Text>
+            )}
           </TouchableOpacity>
 
           {/* divider */}
@@ -159,7 +242,7 @@ const SignIn = ({ navigation }) => {
           <View style={styles.socialContainer}>
             <TouchableOpacity
               style={styles.socialBtn}
-              onPress={handleGoodleSignIn}
+              onPress={handleGoogleSignIn}
             >
               <Image
                 source={google}
@@ -250,6 +333,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: '100%',
     paddingRight: 40,
+    color: '#000',
   },
   eyeButton: {
     position: 'absolute',
@@ -286,7 +370,7 @@ const styles = StyleSheet.create({
   rememberText: {
     fontSize: 12,
     color: '#000',
-    marginLeft: 8
+    marginLeft: 8,
   },
   forgotText: {
     fontSize: 12,
@@ -331,12 +415,18 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontWeight: '600',
   },
-  errorMessage: {
-    color: 'red',
-    marginTop: 4,
-    marginBottom: 2,
-    textAlign: 'left',
-    fontSize: 12,
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 5,
+    borderLeftColor: '#DC2626',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 14,
+    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
