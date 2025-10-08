@@ -189,27 +189,23 @@ export async function getShopDetails() {
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Server error response:', errorData);
-      throw new Error(errorData.message || 'Failed to fetch shop details');
-    }
-    const result = await response.json();
-    const userData = result.data[0];
+    if (!response.ok) throw new Error('Failed to fetch shop details');
 
-    const userDetails = {
-      email: userData.email,
-      site_name: userData.site_name,
-      shop_domain: `${userData.site_name}.hamroaaphnaipasal.com`,
+    const result = await response.json();
+    const userData = result.data?.[0] || {};
+
+    return {
+      email: userData.email || '',
+      site_name: userData.site_name || '',
+      shop_domain: `${userData.site_name || ''}.hamroaaphnaipasal.com`,
     };
-    return userDetails;
   } catch (error) {
-    console.error('Error fetching shop details', error.message);
+    console.error('Error fetching shop details:', error.message);
     throw error;
   }
 }
 
-// Fetch Company and Business Registration Details
+// ✅ Fetch Company Details
 export async function getCompanyDetails() {
   const token = await AsyncStorage.getItem('access_token');
   try {
@@ -222,13 +218,10 @@ export async function getCompanyDetails() {
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Server error response:', errorData);
-      throw new Error(errorData.message || 'Failed to fetch company details');
-    }
+    if (!response.ok) throw new Error('Failed to fetch company details');
+
     const result = await response.json();
-    const data = result.data.company_details; // Access company_details
+    const data = result.data?.company_details || {};
 
     return {
       companyInfo: {
@@ -239,7 +232,7 @@ export async function getCompanyDetails() {
         about: data.about || '',
         siteLogo: data.site_logo
           ? `${config.apiBaseUrl}/storage/${data.site_logo}`
-          : null, // Adjust URL if needed
+          : null,
       },
       businessRegistration: {
         registeredBusinessName: data.business_name || '',
@@ -255,215 +248,110 @@ export async function getCompanyDetails() {
       },
     };
   } catch (error) {
-    console.error('Error fetching company details', error.message);
+    console.error('Error fetching company details:', error.message);
     throw error;
   }
 }
 
+// ✅ Update Company Info
 export async function updateCompanyInfo(data, siteLogo) {
-
   const token = await AsyncStorage.getItem('access_token');
   try {
-    // Basic validation
-    if (!data.siteTitle || !data.contactNumber || !data.contactEmail) {
-      throw new Error(
-        'Missing required fields: siteTitle, contactNumber, or contactEmail',
-      );
-    }
-
     const formData = new FormData();
     formData.append('site_title', data.siteTitle || '');
     formData.append('contact_number', data.contactNumber || '');
     formData.append('contact_address', data.contactAddress || '');
     formData.append('contact_email', data.contactEmail || '');
     formData.append('about', data.about || '');
-    if (siteLogo) {
-      formData.append('site_logo', siteLogo);
-    }
+    if (siteLogo) formData.append('site_logo', siteLogo);
 
     const response = await fetch(`${config.apiBaseUrl}/update-details`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Server error response:', errorData);
-      throw new Error(
-        errorData.message || 'Failed to update company information',
-      );
-    }
+    if (!response.ok) throw new Error('Failed to update company information');
     const result = await response.json();
-    return {
-      success: true,
-      data: result.data || result,
-      message: result.message || 'Company information updated successfully',
-    };
+    return result;
   } catch (error) {
-    console.error('Error updating company information:', error);
+    console.error('Error updating company info:', error);
     throw error;
   }
 }
 
-export async function updateBusinessRegistration(
-  data,
-  registrationDoc,
-  agreementDoc,
-) {
+// ✅ Update Business Registration
+export async function updateBusinessRegistration(data, registrationDoc, agreementDoc) {
+  const token = await AsyncStorage.getItem('access_token');
   try {
-    const requiredFields = {
-      registeredBusinessName: 'Business Name',
-      registeredAddress: 'Registered Address',
-      panNumber: 'PAN Number',
-      registeredPhone: 'Registered Phone',
-      bankName: 'Bank Name',
-      accountNumber: 'Account Number',
-      accountName: 'Account Name',
-      branch: 'Branch',
-    };
-
-    const missingFields = Object.keys(requiredFields).filter(
-      field => !data[field],
-    );
-    if (missingFields.length > 0) {
-      throw new Error(
-        `Missing required fields: ${missingFields
-          .map(field => requiredFields[field])
-          .join(', ')}`,
-      );
-    }
-
     const formData = new FormData();
-    formData.append('business_name', data.registeredBusinessName || '');
-    formData.append('business_address', data.registeredAddress || '');
-    formData.append('business_phone', data.registeredPhone || '');
-    formData.append('business_PAN', data.panNumber || '');
-    formData.append('business_bank_account', data.bankName || '');
-    formData.append('business_account_number', data.accountNumber || '');
-    formData.append('business_account_name', data.accountName || '');
-    formData.append('business_account_branch', data.branch || '');
-    if (registrationDoc) {
-      formData.append('registration_doc', registrationDoc);
-    }
-    if (agreementDoc) {
-      formData.append('agreement_doc', agreementDoc);
-    }
+    Object.entries({
+      business_name: data.registeredBusinessName,
+      business_address: data.registeredAddress,
+      business_phone: data.registeredPhone,
+      business_PAN: data.panNumber,
+      business_bank_account: data.bankName,
+      business_account_number: data.accountNumber,
+      business_account_name: data.accountName,
+      business_account_branch: data.branch,
+    }).forEach(([key, value]) => formData.append(key, value || ''));
 
-    const response = await fetch(
-      `${config.apiBaseUrl}/update-mybusinessdetails`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${AsyncStorage.getItem('access_token')}`,
-        },
-        body: formData,
-      },
-    );
+    if (registrationDoc) formData.append('registration_doc', registrationDoc);
+    if (agreementDoc) formData.append('agreement_doc', agreementDoc);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Server error response:', errorData);
-      if (errorData.status === 'error') {
-        if (errorData.errors) {
-          const errorMessages = Object.entries(errorData.errors)
-            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-            .join('; ');
-          throw new Error(
-            errorMessages || 'Failed to update business registration details',
-          );
-        } else if (errorData.error && errorData.error.includes('SQLSTATE')) {
-          if (
-            errorData.error.includes(
-              "Field 'site_title' doesn't have a default value",
-            )
-          ) {
-            throw new Error(
-              'Server error: Site Title is unexpectedly required. Please contact support or ensure company details are updated first.',
-            );
-          }
-          throw new Error('Database error occurred. Please contact support.');
-        }
-      }
-      throw new Error(
-        errorData.message || 'Failed to update business registration details',
-      );
-    }
+    const response = await fetch(`${config.apiBaseUrl}/update-mybusinessdetails`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
 
+    if (!response.ok) throw new Error('Failed to update business registration');
     const result = await response.json();
-    return {
-      success: true,
-      data: result.data || result,
-      message: result.message || 'Business registration updated successfully',
-    };
+    return result;
   } catch (error) {
-    console.error('Error updating business registration details:', error);
+    console.error('Error updating business registration:', error);
     throw error;
   }
 }
 
+// ✅ Fetch Domain Details
 export async function getDomainDetails() {
+  const token = await AsyncStorage.getItem('access_token');
   try {
     const response = await fetch(`${config.apiBaseUrl}/get-domain`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${AsyncStorage.getItem('access_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch domain details');
-    }
-
+    if (!response.ok) throw new Error('Failed to fetch domain details');
     const result = await response.json();
-
-    return result.data || result;
+    return result.data || {};
   } catch (error) {
     console.error('Error fetching domain details:', error);
     throw error;
   }
 }
 
+// ✅ Update Domain
 export async function updateDomain(domainName) {
+  const token = await AsyncStorage.getItem('access_token');
   try {
-    const domainRegex =
-      /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!domainName || !domainRegex.test(domainName)) {
-      throw new Error(
-        'Invalid domain name. Please enter a valid domain (e.g., yourdomain.com).',
-      );
+      throw new Error('Invalid domain name.');
     }
 
     const formData = new FormData();
-    formData.append('domain_name', domainName || '');
+    formData.append('domain_name', domainName);
 
     const response = await fetch(`${config.apiBaseUrl}/update-domain`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${AsyncStorage.getItem('access_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Server error response:', errorData);
-      if (errorData.status === 'error' && errorData.errors) {
-        const errorMessages = Object.entries(errorData.errors)
-          .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-          .join('; ');
-        throw new Error(errorMessages || 'Failed to update domain');
-      }
-      throw new Error(errorData.message || 'Failed to update domain');
-    }
+    if (!response.ok) throw new Error('Failed to update domain');
     const result = await response.json();
-    return {
-      success: true,
-      data: result.data || result,
-      message: result.message || 'Domain updated successfully',
-    };
+    return result;
   } catch (error) {
     console.error('Error updating domain:', error);
     throw error;

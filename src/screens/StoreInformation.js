@@ -9,10 +9,14 @@ import {
   RefreshControl,
   Image,
   BackHandler,
-  Modal,
   Alert,
+  ActivityIndicator,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'react-native-image-picker';
 import backButton from '../../assets/images/arrow-back.png';
 import {
   getShopDetails,
@@ -69,6 +73,9 @@ const StoreInformation = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [loadingCompany, setLoadingCompany] = useState(false);
+  const [loadingBusiness, setLoadingBusiness] = useState(false);
+  const [loadingDomain, setLoadingDomain] = useState(false);
 
   // Refresh
   const onRefresh = () => {
@@ -91,7 +98,6 @@ const StoreInformation = ({ navigation }) => {
       const companyInfoData = companyData?.companyInfo || {};
       const businessRegData = companyData?.businessRegistration || {};
 
-      // Safely map company info
       setCompanyInfo({
         companyName: companyInfoData?.siteTitle || '',
         email: companyInfoData?.contactEmail || '',
@@ -102,7 +108,6 @@ const StoreInformation = ({ navigation }) => {
         about: companyInfoData?.about || '',
       });
 
-      // Safely map business registration
       setBusinessReg({
         registeredBusinessName: businessRegData?.registeredBusinessName || '',
         registeredPhoneNumber: businessRegData?.registeredPhone || '',
@@ -123,7 +128,7 @@ const StoreInformation = ({ navigation }) => {
         expiryDate: domainData?.expiry_date || '',
       });
     } catch (error) {
-      console.error('Error fetching details:', error.message);
+      console.error('Error fetching details:', error?.message || error);
     }
   };
 
@@ -144,8 +149,25 @@ const StoreInformation = ({ navigation }) => {
     setTimeout(() => setPopupVisible(false), 2000);
   };
 
+  // Image Upload
   const handleLogoUpload = () => {
-    showPopup('Logo upload not implemented yet.');
+    const options = {
+      mediaType: 'photo',
+      quality: 0.8,
+    };
+    ImagePicker.launchImageLibrary(options, response => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Error', response.errorMessage || 'Failed to pick image');
+        return;
+      }
+      const uri = response.assets?.[0]?.uri;
+      if (uri)
+        setCompanyInfo(prev => ({
+          ...prev,
+          logo: { uri, name: 'logo.jpg', type: 'image/jpeg' },
+        }));
+    });
   };
 
   useEffect(() => {
@@ -163,13 +185,54 @@ const StoreInformation = ({ navigation }) => {
     return () => backHandler.remove();
   }, [navigation]);
 
-  // Handlers for saving
-  const handleSaveShopDetails = () =>
-    showPopup('Shop details saved successfully!');
+  // -------------------- Validation --------------------
+  const validateCompanyInfo = () => {
+    if (!companyInfo.companyName.trim()) {
+      Alert.alert('Validation Error', 'Site name is required');
+      return false;
+    }
+    if (!companyInfo.email.trim()) {
+      Alert.alert('Validation Error', 'Email is required');
+      return false;
+    }
+    if (!companyInfo.phone.trim()) {
+      Alert.alert('Validation Error', 'Phone number is required');
+      return false;
+    }
+    return true;
+  };
 
+  const validateBusinessReg = () => {
+    if (!businessReg.registeredBusinessName.trim()) {
+      Alert.alert('Validation Error', 'Business Name is required');
+      return false;
+    }
+    if (!businessReg.registeredAddress.trim()) {
+      Alert.alert('Validation Error', 'Registered Address is required');
+      return false;
+    }
+    if (!businessReg.panNumber.trim()) {
+      Alert.alert('Validation Error', 'PAN Number is required');
+      return false;
+    }
+    return true;
+  };
+
+  const validateDomain = () => {
+    if (!domainSettings.currentDomain.trim()) {
+      Alert.alert('Validation Error', 'Domain name is required');
+      return false;
+    }
+    return true;
+  };
+
+  // -------------------- Handlers --------------------
   const handleSaveCompanyInfo = async () => {
+    if (!validateCompanyInfo()) return;
+
     try {
-      await updateCompanyInfo(
+      setLoadingCompany(true);
+      const result = await updateCompanyInfo(
         {
           siteTitle: companyInfo.companyName,
           contactEmail: companyInfo.email,
@@ -180,34 +243,58 @@ const StoreInformation = ({ navigation }) => {
         },
         companyInfo.logo,
       );
-      showPopup('Company information updated successfully!');
+      showPopup(result.message || 'Company information updated successfully!');
+      await fetchAllDetails();
     } catch (error) {
       Alert.alert('Error', error.message);
+    } finally {
+      setLoadingCompany(false);
     }
   };
 
   const handleSaveBusinessRegistration = async () => {
+    if (!validateBusinessReg()) return;
+
     try {
-      await updateBusinessRegistration(
-        businessReg,
+      setLoadingBusiness(true);
+      const result = await updateBusinessRegistration(
+        {
+          registeredBusinessName: businessReg.registeredBusinessName,
+          registeredPhone: businessReg.registeredPhoneNumber,
+          registeredAddress: businessReg.registeredAddress,
+          bankName: businessReg.bankName,
+          panNumber: businessReg.panNumber,
+          accountName: businessReg.accountName,
+          accountNumber: businessReg.accountNumber,
+          branch: businessReg.branch,
+        },
         businessReg.registrationDoc,
         businessReg.agreementDoc,
       );
-      showPopup('Business registration updated successfully!');
+      showPopup(
+        result.message || 'Business registration updated successfully!',
+      );
+      await fetchAllDetails();
     } catch (error) {
       Alert.alert('Error', error.message);
+    } finally {
+      setLoadingBusiness(false);
     }
   };
 
   const handleSaveDomain = async () => {
+    if (!validateDomain()) return;
+
     try {
+      setLoadingDomain(true);
       await updateDomain(domainSettings.currentDomain);
       showPopup('Domain updated successfully!');
     } catch (error) {
       Alert.alert('Error', error.message);
+    } finally {
+      setLoadingDomain(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Popup */}
@@ -218,222 +305,246 @@ const StoreInformation = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Image source={backButton} style={styles.backIcon} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Store Information</Text>
-        </View>
-
-        <View style={styles.section}>
-          {/* SHOP DETAILS */}
-          <View style={styles.subSection}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* Header */}
+          <View style={styles.headerRow}>
             <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('shopDetails')}
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
             >
-              <Text style={styles.subSectionTitle}>Shop Details</Text>
-              <Text style={styles.toggleIcon}>
-                {expandedSections.shopDetails ? '-' : '+'}
-              </Text>
+              <Image source={backButton} style={styles.backIcon} />
             </Pressable>
-            {expandedSections.shopDetails && (
-              <View>
-                {['siteName', 'shopDomain', 'email'].map(key => (
-                  <View key={key} style={styles.itemRow}>
-                    <Text style={styles.itemTitle}>
-                      {key === 'siteName'
-                        ? 'Site Name'
-                        : key === 'shopDomain'
-                        ? 'Shop Domain'
-                        : 'Email'}
-                    </Text>
-                    <TextInput
-                      style={styles.input}
-                      value={shopDetails[key]}
-                      onChangeText={text =>
-                        setShopDetails(prev => ({ ...prev, [key]: text }))
-                      }
-                      placeholder={`Enter ${key}`}
-                      placeholderTextColor="gray"
-                      keyboardType={
-                        key === 'email' ? 'email-address' : 'default'
-                      }
-                    />
-                  </View>
-                ))}
-                <Pressable
-                  style={[styles.submitButton]}
-                  onPress={handleSaveShopDetails}
-                >
-                  <Text style={styles.submitButtonText}>Submit</Text>
-                </Pressable>
-              </View>
-            )}
+            <Text style={styles.headerTitle}>Store Information</Text>
           </View>
 
-          {/* COMPANY INFO */}
-          <View style={styles.subSection}>
-            <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('companyInfo')}
-            >
-              <Text style={styles.subSectionTitle}>Company Detail</Text>
-              <Text style={styles.toggleIcon}>
-                {expandedSections.companyInfo ? '-' : '+'}
-              </Text>
-            </Pressable>
-            {expandedSections.companyInfo && (
-              <View style={styles.companyCard}>
-                {[
-                  'companyName',
-                  'email',
-                  'phone',
-                  'address',
-                  'website',
-                  'about',
-                ].map(key => (
-                  <View key={key} style={styles.fieldGroup}>
-                    <Text style={styles.fieldLabel}>
-                      {key === 'companyName'
-                        ? 'Company Name'
-                        : key === 'email'
-                        ? 'Email'
-                        : key === 'phone'
-                        ? 'Phone'
-                        : key === 'address'
-                        ? 'Address'
-                        : key === 'website'
-                        ? 'Website'
-                        : 'About'}
-                    </Text>
-                    <TextInput
-                      style={styles.inputField}
-                      value={companyInfo[key]}
-                      onChangeText={text =>
-                        setCompanyInfo(prev => ({ ...prev, [key]: text }))
-                      }
-                      placeholder={`Enter ${key}`}
-                      placeholderTextColor="gray"
-                    />
-                  </View>
-                ))}
-                <Pressable style={styles.uploadBox} onPress={handleLogoUpload}>
-                  <Text style={styles.uploadText}>Upload Logo</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.submitButton}
-                  onPress={handleSaveCompanyInfo}
-                >
-                  <Text style={styles.submitButtonText}>Save Company Info</Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
+          <View style={styles.section}>
+            {/* SHOP DETAILS */}
+            <View style={styles.subSection}>
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => toggleSection('shopDetails')}
+              >
+                <Text style={styles.subSectionTitle}>Shop Details</Text>
+                <Text style={styles.toggleIcon}>
+                  {expandedSections.shopDetails ? '-' : '+'}
+                </Text>
+              </Pressable>
+              {expandedSections.shopDetails && (
+                <View>
+                  {['siteName', 'shopDomain', 'email'].map(key => (
+                    <View key={key} style={styles.itemRow}>
+                      <Text style={styles.itemTitle}>
+                        {key === 'siteName'
+                          ? 'Site Name'
+                          : key === 'shopDomain'
+                          ? 'Shop Domain'
+                          : 'Email'}
+                      </Text>
+                      <TextInput
+                        style={styles.input}
+                        value={shopDetails[key]}
+                        onChangeText={text =>
+                          setShopDetails(prev => ({ ...prev, [key]: text }))
+                        }
+                        placeholder={`Enter ${key}`}
+                        placeholderTextColor="gray"
+                        keyboardType={
+                          key === 'email' ? 'email-address' : 'default'
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
 
-          {/* BUSINESS REGISTRATION */}
-          <View style={styles.subSection}>
-            <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('businessReg')}
-            >
-              <Text style={styles.subSectionTitle}>Business Registration</Text>
-              <Text style={styles.toggleIcon}>
-                {expandedSections.businessReg ? '-' : '+'}
-              </Text>
-            </Pressable>
-            {expandedSections.businessReg && (
-              <View style={styles.companyCard}>
-                {[
-                  { key: 'registeredBusinessName', label: 'Business Name' },
-                  { key: 'registeredPhoneNumber', label: 'Phone' },
-                  { key: 'registeredAddress', label: 'Address' },
-                  { key: 'bankName', label: 'Bank Name' },
-                  { key: 'panNumber', label: 'PAN Number' },
-                  { key: 'accountName', label: 'Account Name' },
-                  { key: 'accountNumber', label: 'Account Number' },
-                  { key: 'branch', label: 'Branch' },
-                ].map(field => (
-                  <View key={field.key} style={styles.fieldGroup}>
-                    <Text style={styles.fieldLabel}>{field.label}</Text>
-                    <TextInput
-                      style={styles.inputField}
-                      value={businessReg[field.key]}
-                      placeholder={`Enter ${field.label}`}
-                      placeholderTextColor="gray"
-                      onChangeText={text =>
-                        setBusinessReg(prev => ({ ...prev, [field.key]: text }))
-                      }
-                    />
-                  </View>
-                ))}
-                <Pressable
-                  style={styles.submitButton}
-                  onPress={handleSaveBusinessRegistration}
-                >
-                  <Text style={styles.submitButtonText}>
-                    Save Business Registration
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
+            {/* COMPANY INFO */}
+            <View style={styles.subSection}>
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => toggleSection('companyInfo')}
+              >
+                <Text style={styles.subSectionTitle}>Company Detail</Text>
+                <Text style={styles.toggleIcon}>
+                  {expandedSections.companyInfo ? '-' : '+'}
+                </Text>
+              </Pressable>
+              {expandedSections.companyInfo && (
+                <View style={styles.companyCard}>
+                  {[
+                    'companyName',
+                    'email',
+                    'phone',
+                    'address',
+                    'website',
+                    'about',
+                  ].map(key => (
+                    <View key={key} style={styles.fieldGroup}>
+                      <Text style={styles.fieldLabel}>{key}</Text>
+                      <TextInput
+                        style={styles.inputField}
+                        value={companyInfo[key]}
+                        placeholder={`Enter ${key}`}
+                        placeholderTextColor="gray"
+                        onChangeText={text =>
+                          setCompanyInfo(prev => ({ ...prev, [key]: text }))
+                        }
+                      />
+                    </View>
+                  ))}
+                  <Pressable
+                    style={styles.uploadBox}
+                    onPress={handleLogoUpload}
+                  >
+                    <Text style={styles.uploadText}>Upload Logo</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.submitButton,
+                      loadingCompany && styles.buttonDisabled,
+                    ]}
+                    onPress={handleSaveCompanyInfo}
+                    disabled={loadingCompany}
+                  >
+                    {loadingCompany ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.submitButtonText}>
+                        Save Company Info
+                      </Text>
+                    )}
+                  </Pressable>
+                </View>
+              )}
+            </View>
 
-          {/* DOMAIN SETTINGS */}
-          <View style={styles.subSection}>
-            <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('domainSettings')}
-            >
-              <Text style={styles.subSectionTitle}>Domain Settings</Text>
-              <Text style={styles.toggleIcon}>
-                {expandedSections.domainSettings ? '-' : '+'}
-              </Text>
-            </Pressable>
-            {expandedSections.domainSettings && (
-              <View style={styles.companyCard}>
-                <Text style={styles.fieldLabel}>Domain Name</Text>
-                <TextInput
-                  style={styles.inputField}
-                  value={domainSettings.currentDomain}
-                  onChangeText={text =>
-                    setDomainSettings(prev => ({
-                      ...prev,
-                      currentDomain: text,
-                    }))
-                  }
-                  placeholder="Enter your domain"
-                  autoCapitalize="none"
-                />
-                <Pressable
-                  style={styles.submitButton}
-                  onPress={handleSaveDomain}
-                >
-                  <Text style={styles.submitButtonText}>Update Domain</Text>
-                </Pressable>
-              </View>
-            )}
+            {/* BUSINESS REGISTRATION */}
+            <View style={styles.subSection}>
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => toggleSection('businessReg')}
+              >
+                <Text style={styles.subSectionTitle}>
+                  Business Registration
+                </Text>
+                <Text style={styles.toggleIcon}>
+                  {expandedSections.businessReg ? '-' : '+'}
+                </Text>
+              </Pressable>
+              {expandedSections.businessReg && (
+                <View style={styles.companyCard}>
+                  {[
+                    { key: 'registeredBusinessName', label: 'Business Name' },
+                    { key: 'registeredPhoneNumber', label: 'Phone' },
+                    { key: 'registeredAddress', label: 'Address' },
+                    { key: 'bankName', label: 'Bank Name' },
+                    { key: 'panNumber', label: 'PAN Number' },
+                    { key: 'accountName', label: 'Account Name' },
+                    { key: 'accountNumber', label: 'Account Number' },
+                    { key: 'branch', label: 'Branch' },
+                  ].map(field => (
+                    <View key={field.key} style={styles.fieldGroup}>
+                      <Text style={styles.fieldLabel}>{field.label}</Text>
+                      <TextInput
+                        style={styles.inputField}
+                        value={businessReg[field.key]}
+                        placeholder={`Enter ${field.label}`}
+                        placeholderTextColor="gray"
+                        onChangeText={text =>
+                          setBusinessReg(prev => ({
+                            ...prev,
+                            [field.key]: text,
+                          }))
+                        }
+                      />
+                    </View>
+                  ))}
+                  <Pressable
+                    style={[
+                      styles.submitButton,
+                      loadingBusiness && styles.buttonDisabled,
+                    ]}
+                    onPress={handleSaveBusinessRegistration}
+                    disabled={loadingBusiness}
+                  >
+                    {loadingBusiness ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.submitButtonText}>
+                        Save Business Registration
+                      </Text>
+                    )}
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            {/* DOMAIN SETTINGS */}
+            <View style={styles.subSection}>
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => toggleSection('domainSettings')}
+              >
+                <Text style={styles.subSectionTitle}>Domain Settings</Text>
+                <Text style={styles.toggleIcon}>
+                  {expandedSections.domainSettings ? '-' : '+'}
+                </Text>
+              </Pressable>
+              {expandedSections.domainSettings && (
+                <View style={styles.companyCard}>
+                  <Text style={styles.fieldLabel}>Domain Name</Text>
+                  <TextInput
+                    style={styles.inputField}
+                    value={domainSettings.currentDomain}
+                    placeholderTextColor="gray"
+                    onChangeText={text =>
+                      setDomainSettings(prev => ({
+                        ...prev,
+                        currentDomain: text,
+                      }))
+                    }
+                    placeholder="Enter your domain"
+                    autoCapitalize="none"
+                  />
+                  <Pressable
+                    style={[
+                      styles.submitButton,
+                      loadingDomain && styles.buttonDisabled,
+                    ]}
+                    onPress={handleSaveDomain}
+                    disabled={loadingDomain}
+                  >
+                    {loadingDomain ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.submitButtonText}>
+                        Show Domain Details
+                      </Text>
+                    )}
+                  </Pressable>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 export default StoreInformation;
 
-// Styles
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { paddingBottom: 35 },

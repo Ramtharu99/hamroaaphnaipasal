@@ -14,8 +14,7 @@ import backButton from '../../assets/images/arrow-back.png';
 import { AuthContext } from '../(auth)/authContex';
 
 const Profile = ({ navigation }) => {
-
-  const {logout} = useContext(AuthContext)
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     const backAction = () => {
@@ -47,18 +46,17 @@ const Profile = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-  Alert.alert('Logout', 'Are you sure want to logout', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Logout',
-      style: 'destructive',
-      onPress: async () => {
-        await logout();
+    Alert.alert('Logout', 'Are you sure want to logout', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
+        },
       },
-    },
-  ]);
-};
-
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
