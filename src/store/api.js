@@ -261,6 +261,8 @@ export async function getCompanyDetails() {
 }
 
 export async function updateCompanyInfo(data, siteLogo) {
+
+  const token = await AsyncStorage.getItem('access_token');
   try {
     // Basic validation
     if (!data.siteTitle || !data.contactNumber || !data.contactEmail) {
@@ -282,7 +284,7 @@ export async function updateCompanyInfo(data, siteLogo) {
     const response = await fetch(`${config.apiBaseUrl}/update-details`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${AsyncStorage.getItem('access_token')}`,
+        Authorization: `Bearer ${token}`,
       },
       body: formData,
     });

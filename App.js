@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+// App.js
+import React, { useContext } from 'react';
 import { Platform, StatusBar, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthProvider, AuthContext } from './src/(auth)/authContex';
 
 // Screens
 import DashBoard from './src/(tabs)/TabNavigator';
@@ -17,33 +18,10 @@ import SetNewPassword from './src/(auth)/NewPassword';
 
 const Stack = createNativeStackNavigator();
 
-const App = () => {
-  const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const AppNavigator = () => {
+  const { isLoggedIn, loading } = useContext(AuthContext);
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('access_token');
-        if (storedToken) {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch (error) {
-        console.log('Error checking login status:', error);
-      } finally {
-        // Give some time for splash/loading screen
-        setTimeout(() => setLoading(false), 1500);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
-
-  if (loading) {
-    return <LoaderScreen />;
-  }
+  if (loading) return <LoaderScreen />;
 
   return (
     <NavigationContainer>
@@ -54,19 +32,15 @@ const App = () => {
           translucent={false}
         />
       )}
-      {Platform.OS === 'ios' && (
-        <View style={{ height: 50, backgroundColor: '#1BB83A' }} />
-      )}
+      {Platform.OS === 'ios' && <View style={{ height: 50, backgroundColor: '#1BB83A' }} />}
 
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isLoggedIn ? (
-          // 🔹 User is logged in
           <>
             <Stack.Screen name="DashBoard" component={DashBoard} />
             <Stack.Screen name="Profile" component={Profile} />
           </>
         ) : (
-          // 🔹 User is not logged in
           <>
             <Stack.Screen name="Role" component={Role} />
             <Stack.Screen name="SignUp" component={SignUp} />
@@ -80,5 +54,11 @@ const App = () => {
     </NavigationContainer>
   );
 };
+
+const App = () => (
+  <AuthProvider>
+    <AppNavigator />
+  </AuthProvider>
+);
 
 export default App;

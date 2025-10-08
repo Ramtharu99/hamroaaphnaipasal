@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,13 +22,15 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { googleClientId } from '../store/config';
+import { AuthContext } from './authContex';
+
 
 const SignIn = ({ navigation }) => {
   const initialValues = {
     email: '',
     password: '',
   };
-
+  
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(initialValues);
@@ -36,14 +38,17 @@ const SignIn = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const router = useRoute();
   const selectedRole = router.params?.role;
+  const {login} = useContext(AuthContext);
 
   const handleSubmit = async () => {
     setLoading(true);
+
     if (!form.email || !form.password) {
       setError('All fields are required');
       setLoading(false);
       return;
     }
+
     if (!isChecked) {
       setError('Please check the checkbox');
       setLoading(false);
@@ -51,8 +56,7 @@ const SignIn = ({ navigation }) => {
     }
 
     try {
-      let roleLabel =
-        selectedRole === 1 ? 'Owner' : selectedRole === 2 ? 'Staff' : null;
+      const roleLabel = selectedRole === 1 ? 'Owner' : selectedRole === 2 ? 'Staff' : null;
 
       const payload = {
         email: form.email,
@@ -63,23 +67,17 @@ const SignIn = ({ navigation }) => {
 
       const result = await loginUser(payload);
 
-      if (result.success) {
+      if (result.access_token) {
+        await login(result.access_token);
         setError('');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'DashBoard' }],
-        });
-        setLoading(false)
       } else {
         setError(result.message || 'Invalid credentials');
-        setLoading(false)
       }
-    } catch (error) {
-      console.log('Error', error);
-      setError('Invalid credential');
-      setLoading(false)
-    }finally{
-      setLoading(false)
+    } catch (err) {
+      console.log('Login error', err);
+      setError('Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 

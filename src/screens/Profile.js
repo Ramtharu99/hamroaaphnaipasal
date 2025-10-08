@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import backButton from '../../assets/images/arrow-back.png';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../(auth)/authContex';
 
 const Profile = ({ navigation }) => {
+
+  const {logout} = useContext(AuthContext)
+
   useEffect(() => {
     const backAction = () => {
       if (navigation.canGoBack()) {
@@ -44,21 +47,18 @@ const Profile = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure want to logout', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          AsyncStorage.removeItem('access_token');
-          navigation.getParent().reset({
-            index:0,
-            routes: [{name: "Role"}]
-          })
-        }
+  Alert.alert('Logout', 'Are you sure want to logout', [
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Logout',
+      style: 'destructive',
+      onPress: async () => {
+        await logout();
       },
-    ]);
-  };
+    },
+  ]);
+};
+
 
   return (
     <SafeAreaView style={styles.container}>
