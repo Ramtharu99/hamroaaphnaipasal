@@ -185,12 +185,12 @@ const Customization = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
       <View style={styles.headerRow}>
-        <Pressable
+        <TouchableOpacity
           style={styles.goBackButton}
           onPress={() => navigation.goBack()}
         >
           <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Customization</Text>
       </View>
 

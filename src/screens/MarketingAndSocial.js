@@ -326,12 +326,12 @@ const MarketingAndSocial = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F8FA' }}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Pressable
+        <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.goBackButton}
         >
           <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Marketing & Social</Text>
       </View>
 

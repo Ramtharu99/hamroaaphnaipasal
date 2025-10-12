@@ -14,6 +14,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'react-native-image-picker';
@@ -314,12 +315,12 @@ const StoreInformation = ({ navigation }) => {
       >
         {/* Header */}
         <View style={styles.headerRow}>
-          <Pressable
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
             <Image source={backButton} style={styles.backIcon} />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Store Information</Text>
         </View>
         {/* Content */}

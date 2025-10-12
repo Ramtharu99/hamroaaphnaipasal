@@ -61,12 +61,12 @@ const Security = ({ navigation }) => {
       <ScrollView contentContainerStyle={{ padding: 8 }}>
         {/* Go Back Button */}
         <View style={styles.headerRow}>
-          <Pressable
+          <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.goBackButton}
           >
             <Image source={backButton} style={{ height: 20, width: 20 }} />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Security</Text>
         </View>
 

@@ -1,5 +1,5 @@
 // AppNavigator.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -134,9 +134,9 @@ const SettingsStack = () => {
           <SafeAreaView style={styles.modalContent}>
             <View style={styles.headerRow}>
               <Text style={styles.modalHeader}>⚙️ Settings</Text>
-              <Pressable onPress={() => navigation.navigate("Profile")}>
+              <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
               <Image source={icons.Profile} style={styles.profileImage} />
-              </Pressable>
+              </TouchableOpacity>
             </View>
             {settingsTabs.map(tab => (
               <View key={tab}>

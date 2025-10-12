@@ -169,12 +169,12 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Pressable
+        <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.goBackButton}
         >
           <Image source={backButton} style={styles.backIcon} />
-        </Pressable>
+        </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Promotions</Text>
 
