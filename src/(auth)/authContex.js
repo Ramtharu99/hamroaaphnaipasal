@@ -8,18 +8,21 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on app start
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const token = await AsyncStorage.getItem('access_token');
         setIsLoggedIn(!!token);
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000); 
       } catch (error) {
         console.log('Error checking login status:', error);
-      } finally {
         setLoading(false);
       }
     };
+
     checkLoginStatus();
   }, []);
 
@@ -39,4 +42,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 export default AuthProvider;

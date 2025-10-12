@@ -1,7 +1,6 @@
 import { config } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 // const token = AsyncStorage.getItem('access_token');
 
 export async function registerUser(data) {
@@ -281,7 +280,11 @@ export async function updateCompanyInfo(data, siteLogo) {
 }
 
 // ✅ Update Business Registration
-export async function updateBusinessRegistration(data, registrationDoc, agreementDoc) {
+export async function updateBusinessRegistration(
+  data,
+  registrationDoc,
+  agreementDoc,
+) {
   const token = await AsyncStorage.getItem('access_token');
   try {
     const formData = new FormData();
@@ -299,11 +302,14 @@ export async function updateBusinessRegistration(data, registrationDoc, agreemen
     if (registrationDoc) formData.append('registration_doc', registrationDoc);
     if (agreementDoc) formData.append('agreement_doc', agreementDoc);
 
-    const response = await fetch(`${config.apiBaseUrl}/update-mybusinessdetails`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+    const response = await fetch(
+      `${config.apiBaseUrl}/update-mybusinessdetails`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      },
+    );
 
     if (!response.ok) throw new Error('Failed to update business registration');
     const result = await response.json();
@@ -354,6 +360,457 @@ export async function updateDomain(domainName) {
     return result;
   } catch (error) {
     console.error('Error updating domain:', error);
+    throw error;
+  }
+}
+
+// ----------------- Privacy Policy -----------------
+export async function getReturnPolicy() {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/return-policy`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to fetch return policy');
+    }
+
+    const result = await response.json();
+    console.log('Return Policy API response:', result); // Debug log
+
+    // Handle nested response structure
+    const returnPolicy =
+      result.data?.company_details?.return_policy ||
+      result.data?.return_policy ||
+      result.return_policy ||
+      '';
+
+    return {
+      return_policy: returnPolicy,
+    };
+  } catch (error) {
+    console.error('Error fetching return policy:', error.message);
+    throw error;
+  }
+}
+
+export async function updatePrivacyPolicy(content) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    if (!content) throw new Error('Privacy policy content cannot be empty');
+
+    const formData = new FormData();
+    formData.append('privacy_policy', content);
+
+    const response = await fetch(`${config.apiBaseUrl}/update-privacy-policy`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to update privacy policy');
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || 'Privacy policy updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating privacy policy:', error.message);
+    throw error;
+  }
+}
+
+// ----------------- Return Policy -----------------
+export async function getPrivacyPolicy() {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/privacy-policy`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to fetch privacy policy');
+    }
+
+    const result = await response.json();
+    console.log('Privacy Policy API response:', result); // Debug log
+
+    // Handle nested response structure
+    const privacyPolicy =
+      result.data?.company_details?.privacy_policy ||
+      result.data?.privacy_policy ||
+      result.privacy_policy ||
+      '';
+
+    return {
+      privacy_policy: privacyPolicy,
+    };
+  } catch (error) {
+    console.error('Error fetching privacy policy:', error.message);
+    throw error;
+  }
+}
+
+export async function updateReturnPolicy(content) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    if (!content) throw new Error('Return policy content cannot be empty');
+
+    const formData = new FormData();
+    formData.append('return_policy', content);
+
+    const response = await fetch(`${config.apiBaseUrl}/update-return-policy`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to update return policy');
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || 'Return policy updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating return policy:', error.message);
+    throw error;
+  }
+}
+
+// ----------------- Terms & Conditions -----------------
+export async function getTermsAndConditions() {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(
+      `${config.apiBaseUrl}/terms-condition?_=${Date.now()}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      throw new Error(
+        errorData.message || 'Failed to fetch terms and conditions',
+      );
+    }
+
+    const result = await response.json();
+    console.log('Raw API response:', result);
+
+    // Correct the path to access terms_condition
+    const termsCondition =
+      result.data?.company_details?.terms_condition ||
+      result.terms_condition ||
+      '';
+
+    console.log('Extracted terms:', termsCondition);
+
+    return {
+      terms_condition: termsCondition,
+    };
+  } catch (error) {
+    console.error('Error fetching terms and conditions:', error.message);
+    throw error;
+  }
+}
+
+export async function updateTermsAndConditions(content) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    if (
+      !content ||
+      content === '<p><br></p>' ||
+      content === 'Write your terms and conditions here...'
+    ) {
+      throw new Error('Terms and conditions content cannot be empty');
+    }
+
+    const formData = new FormData();
+    formData.append('terms_condition', content);
+
+    const response = await fetch(
+      `${config.apiBaseUrl}/update-terms-condition`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Server error response:', errorData);
+      if (errorData.status === 'error' && errorData.errors) {
+        const errorMessages = Object.entries(errorData.errors)
+          .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+          .join('; ');
+        throw new Error(
+          errorMessages || 'Failed to update terms and conditions',
+        );
+      }
+      throw new Error(
+        errorData.message || 'Failed to update terms and conditions',
+      );
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || 'Terms and conditions updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating terms and conditions:', error.message);
+    throw error;
+  }
+}
+
+
+// ----------------- Social Links API Functions -----------------
+export async function getSocialLinks() {
+
+  const token = await AsyncStorage.getItem('access_token');
+
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/sociallinks`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Server error response:", errorData);
+      throw new Error(errorData.message || "Failed to fetch social links");
+    }
+
+    const result = await response.json();
+    
+    // Extract social links from the company details
+    if (result.data && result.data.company_details) {
+      const { 
+        facebook_link, 
+        insta_link, 
+        youtube_link, 
+        pininterest_link, 
+        whatsapp, 
+        tiktok_link 
+      } = result.data.company_details;
+      
+      return {
+        facebook_link: facebook_link || "",
+        insta_link: insta_link || "",
+        youtube_link: youtube_link || "",
+        pininterest_link: pininterest_link || "",
+        whatsapp: whatsapp || "",
+        tiktok_link: tiktok_link || ""
+      };
+    }
+    
+    return {};
+  } catch (error) {
+    console.error("Error fetching social links:", error.message);
+    throw error;
+  }
+}
+
+export async function updateSocialLinks(data) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    if (!data) throw new Error("Social links data cannot be empty");
+
+    const response = await fetch(`${config.apiBaseUrl}/update-sociallinks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Server error response:", errorData);
+      throw new Error(errorData.message || "Failed to update social links");
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || "Social links updated successfully",
+    };
+  } catch (error) {
+    console.error("Error updating social links:", error.message);
+    throw error;
+  }
+}
+
+// ----------------- Get FAQs -----------------
+export async function getFAQs() {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/faq`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch FAQs");
+    }
+
+    const result = await response.json();
+    
+    // The API returns {status: "success", data: {faqs: [...]}}
+    // So we need to return result.data which contains the faqs array
+    return result.data || {};
+  } catch (error) {
+    console.error("Error fetching FAQs:", error.message);
+    throw error;
+  }
+}
+
+// ----------------- Add FAQ -----------------
+export async function addFAQ({ question, answer }) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/add-faq`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ question, answer }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to add FAQ");
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || "FAQ added successfully",
+    };
+  } catch (error) {
+    console.error("Error adding FAQ:", error.message);
+    throw error;
+  }
+}
+
+// ----------------- Update FAQ -----------------
+export async function updateFAQ(id, { question, answer }) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/update-faq/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ question, answer }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to update FAQ");
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || "FAQ updated successfully",
+    };
+  } catch (error) {
+    console.error("Error updating FAQ:", error.message);
+    throw error;
+  }
+}
+
+// ----------------- Delete FAQ -----------------
+export async function deleteFAQ(id) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/delete-faq/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to delete FAQ");
+    }
+
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || "FAQ deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting FAQ:", error.message);
     throw error;
   }
 }

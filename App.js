@@ -4,6 +4,7 @@ import { Platform, StatusBar, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, AuthContext } from './src/(auth)/authContex';
+import {Provider as PaperProvider} from 'react-native-paper';
 
 // Screens
 import DashBoard from './src/(tabs)/TabNavigator';
@@ -57,7 +58,9 @@ const AppNavigator = () => {
 
 const App = () => (
   <AuthProvider>
+    {/* <PaperProvider> */}
     <AppNavigator />
+    {/* </PaperProvider> */}
   </AuthProvider>
 );
 
