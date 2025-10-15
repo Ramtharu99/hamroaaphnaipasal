@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// assets
-import admin from '../../assets/images/admin.png';
-import people from '../../assets/images/people.png';
-import forward from '../../assets/images/forward.png';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Role = ({ navigation }) => {
   const [selectedRole, setSelectedRole] = useState(null);
 
   const roles = [
-    { id: 1, label: 'Owner', icon: admin },
-    { id: 2, label: 'Staff', icon: people },
+    { id: 1, label: 'Owner', icon: 'account-tie' },
+    { id: 2, label: 'Staff', icon: 'account-group' },
   ];
 
   const handlerRole = () => {
-    navigation.navigate("SignIn", {role: selectedRole})
-  }
+    navigation.navigate('SignIn', { role: selectedRole });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,7 +36,11 @@ const Role = ({ navigation }) => {
               onPress={() => setSelectedRole(role.id)}
               activeOpacity={0.8}
             >
-              <Image source={role.icon} style={styles.roleIcon} />
+              <Icon
+                name={role.icon}
+                size={45}
+                color={selectedRole === role.id ? '#10B981' : '#6B7280'}
+              />
               <Text style={styles.roleLabel}>{role.label}</Text>
             </TouchableOpacity>
           ))}
@@ -57,13 +57,13 @@ const Role = ({ navigation }) => {
           activeOpacity={0.8}
         >
           <Text style={styles.continueText}>Continue</Text>
-          <Image source={forward} style={styles.forwardIcon} />
+          <Icon name="arrow-right-circle" size={26} color="#fff" />
         </TouchableOpacity>
 
         {/* Footer link */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't have an account? {' '}
+            Don't have an account?{' '}
             <Text
               style={styles.signupText}
               onPress={() => navigation.push('SignUp')}
@@ -136,11 +136,6 @@ const styles = StyleSheet.create({
     borderColor: '#10B981',
     backgroundColor: '#ECFDF5',
   },
-  roleIcon: {
-    height: 30,
-    width: 30,
-    resizeMode: 'contain',
-  },
   roleLabel: {
     marginTop: 8,
     fontSize: 14,
@@ -166,19 +161,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginRight: 8,
   },
-  forwardIcon: {
-    height: 25,
-    width: 25,
-    tintColor: '#fff',
-    resizeMode: 'contain',
-  },
   footer: {
     marginTop: 10,
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   footerText: {
     fontSize: 14,
     color: '#374151',

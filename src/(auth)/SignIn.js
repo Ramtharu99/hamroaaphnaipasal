@@ -11,10 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import back from '../../assets/images/back.png';
 import google from '../../assets/images/google.png';
-import eye from '../../assets/images/eye.png';
-import eyeOff from '../../assets/images/eye-off.png';
 import { loginUser } from '../store/api';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -23,6 +20,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import { googleClientId } from '../store/config';
 import { AuthContext } from './authContex';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
 const SignIn = ({ navigation }) => {
@@ -144,10 +142,7 @@ const SignIn = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('Role')}
         >
-          <Image
-            source={back}
-            style={{ height: 18, width: 18, tintColor: '#6B7280' }}
-          />
+          <Icon name="arrow-left" size={20} color="#6B7280" />
           <Text style={styles.backButtonText}>Back to role selection</Text>
         </TouchableOpacity>
 
@@ -188,12 +183,7 @@ const SignIn = ({ navigation }) => {
               style={styles.eyeButton}
               onPress={() => setShowPassword(prev => !prev)}
             >
-              <Image
-                source={showPassword ? eye : eyeOff}
-                style={{ width: 25, height: 25 }}
-                tintColor={'#6B7280'}
-                resizeMode="contain"
-              />
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
             </TouchableOpacity>
           </View>
 
@@ -336,7 +326,7 @@ const styles = StyleSheet.create({
   eyeButton: {
     position: 'absolute',
     right: 12,
-    top: 12,
+    top: 16,
   },
   continueBtn: {
     alignItems: 'center',

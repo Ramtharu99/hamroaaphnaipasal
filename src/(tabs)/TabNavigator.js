@@ -3,17 +3,16 @@ import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
-  Image,
   StatusBar,
   StyleSheet,
   Animated,
   TouchableOpacity,
-  Pressable,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 // Import Screens
 import DashBoardScreen from './DashBoard';
@@ -39,13 +38,11 @@ const TopTab = createMaterialTopTabNavigator();
 
 // Tab icons
 const icons = {
-  DashBoard: require('../../assets/images/home.png'),
-  Orders: require('../../assets/images/order.png'),
-  Products: require('../../assets/images/inventory.png'),
-  Analytics: require('../../assets/images/analysis.png'),
-  Setting: require('../../assets/images/setting.png'),
-  Profile: require('../../assets/images/profile.png'),
-  Dropdown: require('../../assets/images/dropdown.png'),
+  DashBoard: 'home-outline',
+  Orders: 'cart-outline',
+  Products: 'clipboard-outline',
+  Analytics: 'bar-chart-outline',
+  Setting: 'settings-outline',
 };
 
 // Top Tabs inside Settings
@@ -130,14 +127,15 @@ const SettingsStack = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="SettingsHome"
-        component={({navigation}) => (
+        component={({ navigation }) => (
           <SafeAreaView style={styles.modalContent}>
             <View style={styles.headerRow}>
               <Text style={styles.modalHeader}>⚙️ Settings</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-              <Image source={icons.Profile} style={styles.profileImage} />
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Icon name="person-circle-outline" size={40} color="#1BB83A" />
               </TouchableOpacity>
             </View>
+
             {settingsTabs.map(tab => (
               <View key={tab}>
                 <TouchableOpacity
@@ -149,15 +147,17 @@ const SettingsStack = () => {
                     else navigation.navigate(tab);
                   }}
                 >
-                  <Text style={styles.optionText}>{tab}</Text>
+                  <Text style={styles.optionText}>{tab + " "}</Text>
                   {tab === 'More Settings' && (
-                    <Animated.Image
-                      source={icons.Dropdown}
-                      style={[
-                        styles.dropdownIcon,
-                        { transform: [{ rotate: rotateIcon }] },
-                      ]}
-                    />
+                    <Animated.View
+                      style={{ transform: [{ rotate: rotateIcon }] }}
+                    >
+                      <Icon
+                        name="chevron-down-outline"
+                        size={20}
+                        color="#333"
+                      />
+                    </Animated.View>
                   )}
                 </TouchableOpacity>
 
@@ -224,29 +224,16 @@ const TabNavigator = () => {
             paddingTop: 8,
             paddingBottom: 8,
             elevation: 8,
-            marginHorizontal: 8
+            marginHorizontal: 8,
           },
           tabBarIcon: ({ focused }) => {
-            const icon = icons[route.name];
+            const iconName = icons[route.name];
             return (
-              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                <View
-                  style={[
-                    { padding: 8, borderRadius: 16 },
-                    focused && { backgroundColor: 'rgba(27, 184, 58, 0.12)' },
-                  ]}
-                >
-                  <Image
-                    source={icon}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      resizeMode: 'contain',
-                      tintColor: focused ? '#1BB83A' : 'black',
-                    }}
-                  />
-                </View>
-              </View>
+              <Icon
+                name={iconName}
+                size={25}
+                color={focused ? '#1BB83A' : 'black'} // active tab green, inactive black
+              />
             );
           },
           tabBarLabel: ({ focused }) => (
@@ -291,15 +278,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalHeader: { fontSize: 18, fontWeight: 'bold', color: '#111' },
-  profileImage: { width: 35, height: 35, borderRadius: 20 },
-  optionText: { fontSize: 16, color: '#333', width: 150 },
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+    flexShrink: 1, // allow text to shrink instead of truncating
+  },
   optionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
   },
-  dropdownIcon: { width: 16, height: 16, tintColor: '#333' },
   dropdownContainer: {
     marginLeft: 24,
     marginTop: 4,

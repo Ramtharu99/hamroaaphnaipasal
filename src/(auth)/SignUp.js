@@ -11,10 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import back from '../../assets/images/back.png';
 import google from '../../assets/images/google.png';
-import eye from '../../assets/images/eye.png';
-import eyeOff from '../../assets/images/eye-off.png';
 import { registerUser } from '../store/api';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -22,6 +19,8 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { googleClientId } from '../store/config';
+
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const SignUp = ({ navigation }) => {
   const router = useRoute();
@@ -38,7 +37,7 @@ const SignUp = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = field => value => {
@@ -51,18 +50,13 @@ const SignUp = ({ navigation }) => {
     if (
       !form.site_name ||
       !form.email ||
-      !form.password ||
-      !form.confirmPassword
+      !form.password
     ) {
       setError('All fields are required');
       setLoading(false);
       return;
     }
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
+
     if (!form.captchaChecked) {
       setError('Please verify you are not a robot');
       setLoading(false);
@@ -163,7 +157,7 @@ const SignUp = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image source={back} style={styles.backIcon} />
+          <Icon name="arrow-left" size={20} color="#6B7280" />
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
@@ -210,16 +204,12 @@ const SignUp = ({ navigation }) => {
               style={styles.eyeButton}
               onPress={() => setShowPassword(prev => !prev)}
             >
-              <Image
-                source={showPassword ? eye : eyeOff}
-                style={{ height: 25, width: 25, tintColor: '#6B7280' }}
-                resizeMode="contain"
-              />
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
             </TouchableOpacity>
           </View>
 
           {/* Confirm Password */}
-          <Text style={styles.label}>Confirm Password</Text>
+          {/* <Text style={styles.label}>Confirm Password</Text>
           <View style={styles.inputWrapper}>
             <TextInput
               style={[styles.inputField, error && { borderColor: 'red' }]}
@@ -239,7 +229,7 @@ const SignUp = ({ navigation }) => {
                 resizeMode="contain"
               />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Captcha */}
           <View style={styles.checkboxContainer}>

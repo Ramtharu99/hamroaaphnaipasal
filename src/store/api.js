@@ -609,54 +609,52 @@ export async function updateTermsAndConditions(content) {
   }
 }
 
-
 // ----------------- Social Links API Functions -----------------
 export async function getSocialLinks() {
-
   const token = await AsyncStorage.getItem('access_token');
 
   try {
     const response = await fetch(`${config.apiBaseUrl}/sociallinks`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("Server error response:", errorData);
-      throw new Error(errorData.message || "Failed to fetch social links");
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to fetch social links');
     }
 
     const result = await response.json();
-    
+
     // Extract social links from the company details
     if (result.data && result.data.company_details) {
-      const { 
-        facebook_link, 
-        insta_link, 
-        youtube_link, 
-        pininterest_link, 
-        whatsapp, 
-        tiktok_link 
+      const {
+        facebook_link,
+        insta_link,
+        youtube_link,
+        pininterest_link,
+        whatsapp,
+        tiktok_link,
       } = result.data.company_details;
-      
+
       return {
-        facebook_link: facebook_link || "",
-        insta_link: insta_link || "",
-        youtube_link: youtube_link || "",
-        pininterest_link: pininterest_link || "",
-        whatsapp: whatsapp || "",
-        tiktok_link: tiktok_link || ""
+        facebook_link: facebook_link || '',
+        insta_link: insta_link || '',
+        youtube_link: youtube_link || '',
+        pininterest_link: pininterest_link || '',
+        whatsapp: whatsapp || '',
+        tiktok_link: tiktok_link || '',
       };
     }
-    
+
     return {};
   } catch (error) {
-    console.error("Error fetching social links:", error.message);
+    console.error('Error fetching social links:', error.message);
     throw error;
   }
 }
@@ -664,13 +662,13 @@ export async function getSocialLinks() {
 export async function updateSocialLinks(data) {
   const token = await AsyncStorage.getItem('access_token');
   try {
-    if (!data) throw new Error("Social links data cannot be empty");
+    if (!data) throw new Error('Social links data cannot be empty');
 
     const response = await fetch(`${config.apiBaseUrl}/update-sociallinks`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
@@ -678,18 +676,18 @@ export async function updateSocialLinks(data) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("Server error response:", errorData);
-      throw new Error(errorData.message || "Failed to update social links");
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to update social links');
     }
 
     const result = await response.json();
     return {
       success: true,
       data: result.data || result,
-      message: result.message || "Social links updated successfully",
+      message: result.message || 'Social links updated successfully',
     };
   } catch (error) {
-    console.error("Error updating social links:", error.message);
+    console.error('Error updating social links:', error.message);
     throw error;
   }
 }
@@ -699,26 +697,26 @@ export async function getFAQs() {
   const token = await AsyncStorage.getItem('access_token');
   try {
     const response = await fetch(`${config.apiBaseUrl}/faq`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to fetch FAQs");
+      throw new Error(errorData.message || 'Failed to fetch FAQs');
     }
 
     const result = await response.json();
-    
+
     // The API returns {status: "success", data: {faqs: [...]}}
     // So we need to return result.data which contains the faqs array
     return result.data || {};
   } catch (error) {
-    console.error("Error fetching FAQs:", error.message);
+    console.error('Error fetching FAQs:', error.message);
     throw error;
   }
 }
@@ -728,10 +726,10 @@ export async function addFAQ({ question, answer }) {
   const token = await AsyncStorage.getItem('access_token');
   try {
     const response = await fetch(`${config.apiBaseUrl}/add-faq`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ question, answer }),
@@ -739,17 +737,17 @@ export async function addFAQ({ question, answer }) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to add FAQ");
+      throw new Error(errorData.message || 'Failed to add FAQ');
     }
 
     const result = await response.json();
     return {
       success: true,
       data: result.data || result,
-      message: result.message || "FAQ added successfully",
+      message: result.message || 'FAQ added successfully',
     };
   } catch (error) {
-    console.error("Error adding FAQ:", error.message);
+    console.error('Error adding FAQ:', error.message);
     throw error;
   }
 }
@@ -759,10 +757,10 @@ export async function updateFAQ(id, { question, answer }) {
   const token = await AsyncStorage.getItem('access_token');
   try {
     const response = await fetch(`${config.apiBaseUrl}/update-faq/${id}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ question, answer }),
@@ -770,17 +768,17 @@ export async function updateFAQ(id, { question, answer }) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to update FAQ");
+      throw new Error(errorData.message || 'Failed to update FAQ');
     }
 
     const result = await response.json();
     return {
       success: true,
       data: result.data || result,
-      message: result.message || "FAQ updated successfully",
+      message: result.message || 'FAQ updated successfully',
     };
   } catch (error) {
-    console.error("Error updating FAQ:", error.message);
+    console.error('Error updating FAQ:', error.message);
     throw error;
   }
 }
@@ -790,27 +788,104 @@ export async function deleteFAQ(id) {
   const token = await AsyncStorage.getItem('access_token');
   try {
     const response = await fetch(`${config.apiBaseUrl}/delete-faq/${id}`, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to delete FAQ");
+      throw new Error(errorData.message || 'Failed to delete FAQ');
     }
 
     const result = await response.json();
     return {
       success: true,
       data: result.data || result,
-      message: result.message || "FAQ deleted successfully",
+      message: result.message || 'FAQ deleted successfully',
     };
   } catch (error) {
-    console.error("Error deleting FAQ:", error.message);
+    console.error('Error deleting FAQ:', error.message);
+    throw error;
+  }
+}
+
+// ----------------- Security Settings API -----------------
+export async function getSecuritySettings() {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    console.log('Fetching security settings with token:', token); // Debug token
+    const response = await fetch(`${config.apiBaseUrl}/security-settings`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.log('Get error response:', errorData); // Debug error
+      throw new Error(errorData.message || 'Failed to fetch security settings');
+    }
+
+    const result = await response.json();
+    console.log('Get response:', result); // Debug response
+    return result.data || result;
+  } catch (error) {
+    console.error('Error fetching security settings:', error.message, {
+      errorData: error,
+    });
+    throw error;
+  }
+}
+
+export async function updateSecuritySettings(settings) {
+  const token = await AsyncStorage.getItem('access_token');
+  try {
+    console.log('API Base URL:', config.apiBaseUrl); 
+    console.log(
+      'Updating security settings with payload:',
+      settings,
+      'and token:',
+      token,
+    ); // Debug payload and token
+    const response = await fetch(
+      `${config.apiBaseUrl}/update-security-settings`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(settings),
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.log('Update error response:', errorData); // Detailed error logging
+      throw new Error(
+        errorData.message || 'Failed to update security settings',
+      );
+    }
+
+    const result = await response.json();
+    console.log('Update response:', result); // Debug response
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || 'Security settings updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating security settings:', error.message, {
+      errorData: error,
+    });
     throw error;
   }
 }

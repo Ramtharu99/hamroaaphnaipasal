@@ -5,13 +5,12 @@ import {
   TouchableOpacity,
   TextInput,
   KeyboardAvoidingView,
-  Image,
   ActivityIndicator,
 } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
-import back from '../../assets/images/back.png';
 import { OTP } from '../store/api';
 import { useRoute } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const VerifyOtp = ({ navigation }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -123,10 +122,7 @@ const VerifyOtp = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image
-            source={back}
-            style={{ height: 18, width: 18, tintColor: '#6B7280' }}
-          />
+          <Icon name="arrow-left" size={20} color="#6B7280" />
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 

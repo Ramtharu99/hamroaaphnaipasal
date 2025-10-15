@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const ECommerceCard = ({
   cardColor,
-  imageSource,
+  icon,
   title,
   value,
   percentage,
@@ -14,8 +15,21 @@ const ECommerceCard = ({
       {/* Top Row */}
       <View style={styles.topRow}>
         <Text style={styles.title}>{title}</Text>
-        <View style={styles.iconWrapper}>
-          <Image source={imageSource} style={styles.image} />
+        <View
+          style={[
+            styles.iconWrapper,
+            {
+              backgroundColor: isNegative
+                ? 'rgba(229, 57, 53, 0.12)'
+                : 'rgba(27, 184, 58, 0.12)',
+            },
+          ]}
+        >
+          <Icon
+            name={icon}
+            size={25}
+            color={isNegative ? '#E53935' : '#1BB83A'}
+          />
         </View>
       </View>
 
@@ -58,15 +72,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   iconWrapper: {
-    backgroundColor: 'rgba(27, 184, 58, 0.12)', // light green background
     padding: 6,
     borderRadius: 12,
-  },
-  image: {
-    width: 26,
-    height: 26,
-    resizeMode: 'contain',
-    tintColor: '#1BB83A',
   },
   title: {
     fontSize: 14,

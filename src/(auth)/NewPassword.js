@@ -17,6 +17,7 @@ import back from '../../assets/images/back.png';
 import eye from '../../assets/images/eye.png';
 import eyeOff from '../../assets/images/eye-off.png';
 import { updatePassword } from '../store/api';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const SetNewPassword = ({ navigation, route }) => {
   const { email, code } = route.params;
@@ -86,7 +87,7 @@ const SetNewPassword = ({ navigation, route }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image source={back} style={styles.backIcon} />
+          <Icon name="arrow-left" size={20} color="#6B7280" />
           <Text style={styles.backButtonText}>Back to login </Text>
         </TouchableOpacity>
 
@@ -111,10 +112,7 @@ const SetNewPassword = ({ navigation, route }) => {
               style={styles.eyeButton}
               onPress={() => setShowPassword(prev => !prev)}
             >
-              <Image
-                source={showPassword ? eye : eyeOff}
-                style={styles.eyeIcon}
-              />
+              <Icon name={showPassword ? 'eye' : 'eye-off'} size={25} color="#6B7280" />
             </TouchableOpacity>
           </View>
         </View>
@@ -135,10 +133,7 @@ const SetNewPassword = ({ navigation, route }) => {
               style={styles.eyeButton}
               onPress={() => setShowConfirmPassword(prev => !prev)}
             >
-              <Image
-                source={showConfirmPassword ? eye : eyeOff}
-                style={styles.eyeIcon}
-              />
+              <Icon name={showConfirmPassword ? 'eye' : 'eye-off'} size={25} color="#6B7280" />
             </TouchableOpacity>
           </View>
         </View>

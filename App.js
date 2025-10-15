@@ -28,12 +28,10 @@ const AppNavigator = () => {
     <NavigationContainer>
       {Platform.OS === 'android' && (
         <StatusBar
-          barStyle="light-content"
-          backgroundColor="#1BB83A"
-          translucent={false}
+          barStyle="dark-content"
         />
       )}
-      {Platform.OS === 'ios' && <View style={{ height: 50, backgroundColor: '#1BB83A' }} />}
+      {Platform.OS === 'ios' && <View style={{ height: 50 }} />}
 
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isLoggedIn ? (
@@ -58,9 +56,9 @@ const AppNavigator = () => {
 
 const App = () => (
   <AuthProvider>
-    {/* <PaperProvider> */}
+    <PaperProvider>
     <AppNavigator />
-    {/* </PaperProvider> */}
+    </PaperProvider>
   </AuthProvider>
 );
 

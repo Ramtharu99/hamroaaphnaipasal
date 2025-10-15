@@ -12,6 +12,7 @@ import { useState } from 'react';
 import Checkbox from 'expo-checkbox';
 import back from '../../assets/images/back.png';
 import { requestPasswordReset } from '../store/api';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ForgotPassword = ({ navigation }) => {
   const initialValue = { email: '' };
@@ -65,10 +66,7 @@ const ForgotPassword = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate('SignIn')}
         >
-          <Image
-            source={back}
-            style={{ height: 18, width: 18, tintColor: '#6B7280' }}
-          />
+          <Icon name="arrow-left" size={20} color="#6B7280" />
           <Text style={styles.backButtonText}>Back to sign in</Text>
         </TouchableOpacity>
 
@@ -188,7 +186,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  label: { fontSize: 14, color: '#000' },
+  label: { fontSize: 14, color: '#000', marginBottom: 6 },
   inputField: {
     padding: 14,
     backgroundColor: '#fff',
