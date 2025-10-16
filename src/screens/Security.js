@@ -90,10 +90,20 @@ const Security = ({ navigation }) => {
     try {
       const payload = {
         two_factor_enabled: newEnabled ? 1 : 0,
-        otp_status: 0, // Include otp_status, assuming it’s required
+        otp_status: newEnabled ? 1 : 0, // Send 1 when enabling, 0 when disabling
       };
       console.log('Sending payload to updateSecuritySettings:', payload); 
-      await updateSecuritySettings(payload);
+      const result = await updateSecuritySettings(payload);
+
+      // Update UI with the state from the server response
+      setSections(prevSections => {
+        const newSections = [...prevSections];
+        newSections[sectionIndex].items[itemIndex].enabled = Boolean(
+          result.data?.two_factor_enabled,
+        );
+        return newSections;
+      });
+
       Alert.alert('Success', 'Security settings updated successfully.');
     } catch (error) {
       console.error('Failed to update security settings:', error.message, { error });

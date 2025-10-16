@@ -854,6 +854,7 @@ export async function updateSecuritySettings(settings) {
       'and token:',
       token,
     ); // Debug payload and token
+
     const response = await fetch(
       `${config.apiBaseUrl}/update-security-settings`,
       {
@@ -880,7 +881,7 @@ export async function updateSecuritySettings(settings) {
     return {
       success: true,
       data: result.data || result,
-      message: result.message || 'Security settings updated successfully',
+      message: result.message || 'Security settings updated successfully.',
     };
   } catch (error) {
     console.error('Error updating security settings:', error.message, {
