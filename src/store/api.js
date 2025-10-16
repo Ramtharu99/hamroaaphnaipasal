@@ -847,7 +847,7 @@ export async function getSecuritySettings() {
 export async function updateSecuritySettings(settings) {
   const token = await AsyncStorage.getItem('access_token');
   try {
-    console.log('API Base URL:', config.apiBaseUrl); 
+    console.log('API Base URL:', config.apiBaseUrl);
     console.log(
       'Updating security settings with payload:',
       settings,

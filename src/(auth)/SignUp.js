@@ -69,7 +69,7 @@ const SignUp = ({ navigation }) => {
     }
 
     const payload = {
-      site_name: form.site_name.concat('.hamroaaphnai.com'),
+      site_name: form.site_name,
       email: form.email,
       password: form.password,
       accept_term: form.accept_term,
@@ -82,12 +82,12 @@ const SignUp = ({ navigation }) => {
         navigation.navigate('Role');
         setLoading(false)
       } else {
-        setError('Invalid redential');
+        setError(result.message || 'Invalid credential');
         setLoading(false)
       }
     } catch (err) {
       console.error('Signup error:', err);
-      setError("Something went wrong");
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
