@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Image, Animated, StyleSheet } from 'react-native';
+import { View, Text, Image, Animated, StyleSheet, StatusBar } from 'react-native';
 import logo from '../../assets/images/logo.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -34,6 +34,7 @@ const LoaderScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <Image
         source={logo}
         resizeMode="contain"
