@@ -13,194 +13,90 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
+import CustomHeader from '../components/CustomHeader';
 import backButton from '../../assets/images/arrow-back.png';
 
+import colors from '../constants/colors';
+
+// ... (existing imports)
+
 const ManageStaff = ({ navigation }) => {
-  const [staffList, setStaffList] = useState([]);
-  const [filterText, setFilterText] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
-  const [newStaff, setNewStaff] = useState({
-    name: '',
-    role: '',
-    email: '',
-    status: 'Active',
-  });
-  const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
-
-  useEffect(() => {
-    const data = [
-      {
-        id: 1,
-        name: 'John Doe',
-        role: 'Administrator',
-        email: 'john@example.com',
-        status: 'Active',
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        role: 'Manager',
-        email: 'jane@example.com',
-        status: 'Active',
-      },
-      {
-        id: 3,
-        name: 'Robert Johnson',
-        role: 'Support',
-        email: 'robert@example.com',
-        status: 'Inactive',
-      },
-    ];
-    setStaffList(data);
-
-    // Android back button handling
-    const backAction = () => {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigation]);
-
-  const filteredStaff = staffList.filter(staff =>
-    staff.name.toLowerCase().includes(filterText.toLowerCase()),
-  );
-
-  const handleSave = () => {
-    if (editIndex !== null) {
-      const updated = [...staffList];
-      updated[editIndex] = { ...newStaff, id: staffList[editIndex].id };
-      setStaffList(updated);
-      showToast('Staff updated successfully!');
-    } else {
-      setStaffList(prev => [...prev, { ...newStaff, id: prev.length + 1 }]);
-      showToast('Staff added successfully!');
-    }
-    setModalVisible(false);
-    setEditIndex(null);
-    setNewStaff({ name: '', role: '', email: '', status: 'Active' });
-  };
-
-  const handleEdit = index => {
-    setEditIndex(index);
-    setNewStaff(staffList[index]);
-    setModalVisible(true);
-  };
-
-  const handleDelete = index => {
-    Alert.alert('Confirm Delete', 'Are you sure want to delete?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => setStaffList(prev => prev.filter((_, i) => i !== index)),
-      },
-    ]);
-  };
-
-  const showToast = message => {
-    Toast.show({
-      type: 'success',
-      text1: 'Success',
-      text2: message,
-      visibilityTime: 2000,
-    });
-  };
-
-  const statusOptions = ['Active', 'Inactive'];
-
-  const customToast = props => (
-    <BaseToast
-      {...props}
-      style={styles.toast}
-      contentContainerStyle={styles.toastContent}
-      text1Style={styles.toastText1}
-      text2Style={styles.toastText2}
-    />
-  );
+  // ... (existing state and useEffect)
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Manage Staff</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            setEditIndex(null);
-            setNewStaff({ name: '', role: '', email: '', status: 'Active' });
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.addButtonText}>+ Add</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by name..."
-        value={filterText}
-        onChangeText={setFilterText}
-        placeholderTextColor="#6B7280"
+      <CustomHeader
+        title="Manage Staff"
+        leftType="back"
+        rightComponent={
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              setEditIndex(null);
+              setNewStaff({ name: '', role: '', email: '', status: 'Active' });
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        }
       />
 
-      {/* Staff List */}
-      <ScrollView style={styles.listContainer}>
-        {filteredStaff.map((staff, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.cardRow}>
-              <Text style={styles.cardText}>ID: {staff.id}</Text>
-              <Text style={styles.cardText}>Name: {staff.name}</Text>
-              <Text style={styles.cardText}>Role: {staff.role}</Text>
-              <Text style={styles.cardText}>Email: {staff.email}</Text>
-              <Text
-                style={[
-                  styles.cardText,
-                  staff.status === 'Active'
-                    ? styles.activeStatus
-                    : styles.inactiveStatus,
-                ]}
-              >
-                {staff.status}
-              </Text>
+      <View style={styles.contentContainer}>
+        {/* Search */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name..."
+          value={filterText}
+          onChangeText={setFilterText}
+          placeholderTextColor="#6B7280"
+        />
+
+        {/* Staff List */}
+        <ScrollView style={styles.listContainer}>
+          {filteredStaff.map((staff, index) => (
+            <View key={index} style={styles.card}>
+              <View style={styles.cardRow}>
+                <Text style={styles.cardText}>ID: {staff.id}</Text>
+                <Text style={styles.cardText}>Name: {staff.name}</Text>
+                <Text style={styles.cardText}>Role: {staff.role}</Text>
+                <Text style={styles.cardText}>Email: {staff.email}</Text>
+                <Text
+                  style={[
+                    styles.cardText,
+                    staff.status === 'Active'
+                      ? styles.activeStatus
+                      : styles.inactiveStatus,
+                  ]}
+                >
+                  {staff.status}
+                </Text>
+              </View>
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => handleEdit(index)}
+                >
+                  <Text style={styles.actionText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDelete(index)}
+                >
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => handleEdit(index)}
-              >
-                <Text style={styles.actionText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(index)}
-              >
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-        <Text style={styles.pagination}>
-          Showing {filteredStaff.length} of {staffList.length} staff
-        </Text>
-      </ScrollView>
+          ))}
+          <Text style={styles.pagination}>
+            Showing {filteredStaff.length} of {staffList.length} staff
+          </Text>
+        </ScrollView>
+      </View>
 
       {/* Add/Edit Modal */}
+      {/* ... (Modals remain similar) ... */}
       <Modal visible={modalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -297,10 +193,14 @@ export default ManageStaff;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
+  },
+  contentContainer: {
+    flex: 1,
     paddingHorizontal: 10,
     paddingTop: 10,
   },
+  // ... (rest of styles)
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',

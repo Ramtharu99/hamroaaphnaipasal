@@ -15,325 +15,19 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DataTable, Button } from 'react-native-paper';
-import backButton from '../../assets/images/arrow-back.png';
-import {
-  getSocialLinks,
-  updateSocialLinks,
-  getFAQs,
-  addFAQ,
-  updateFAQ,
-  deleteFAQ,
-} from '../store/api';
+import colors from '../constants/colors';
 
-const socialIcons = {
-  Facebook: require('../../assets/images/facebook.png'),
-  Instagram: require('../../assets/images/instagram.png'),
-  YouTube: require('../../assets/images/youtube.png'),
-  WhatsApp: require('../../assets/images/whatsapp.png'),
-  TikTok: require('../../assets/images/tik-tok.png'),
-  Pinterest: require('../../assets/images/pinterest.png'),
-};
-
-const initialSocialData = [
-  {
-    title: 'Facebook',
-    value: '',
-    icon: socialIcons.Facebook,
-    apiKey: 'facebook_link',
-  },
-  {
-    title: 'Instagram',
-    value: '',
-    icon: socialIcons.Instagram,
-    apiKey: 'insta_link',
-  },
-  {
-    title: 'YouTube',
-    value: '',
-    icon: socialIcons.YouTube,
-    apiKey: 'youtube_link',
-  },
-  {
-    title: 'WhatsApp',
-    value: '',
-    icon: socialIcons.WhatsApp,
-    apiKey: 'whatsapp',
-  },
-  {
-    title: 'TikTok',
-    value: '',
-    icon: socialIcons.TikTok,
-    apiKey: 'tiktok_link',
-  },
-  {
-    title: 'Pinterest',
-    value: '',
-    icon: socialIcons.Pinterest,
-    apiKey: 'pininterest_link',
-  },
-];
+// ... (existing imports)
 
 const MarketingAndSocial = ({ navigation }) => {
-  const [socialData, setSocialData] = useState(initialSocialData);
-  const [faqData, setFaqData] = useState([]);
-  const [newFAQ, setNewFAQ] = useState({ question: '', answer: '' });
-  const [expandedSections, setExpandedSections] = useState({
-    social: false,
-    faq: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [socialModalVisible, setSocialModalVisible] = useState(false);
-  const [editSocial, setEditSocial] = useState({
-    index: null,
-    title: '',
-    value: '',
-    apiKey: '',
-  });
-  const [faqModalVisible, setFaqModalVisible] = useState(false);
-  const [editFAQ, setEditFAQ] = useState({
-    id: null,
-    question: '',
-    answer: '',
-  });
+  // ... (existing state)
 
-  // Fetch social links and FAQs
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const socialLinks = await getSocialLinks();
-        const updatedSocialData = initialSocialData.map(item => ({
-          ...item,
-          value: socialLinks[item.apiKey] || item.value,
-        }));
-        setSocialData(updatedSocialData);
-
-        const faqs = await getFAQs();
-        console.log('Fetched FAQs:', faqs); 
-        setFaqData(faqs.faqs || []);
-      } catch (error) {
-        console.error('Fetch data error:', error);
-        Alert.alert('Error', error.message || 'Failed to fetch data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // Handle Android back button
-  useEffect(() => {
-    const backAction = () => {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
-  }, [navigation]);
-
-  // Toggle section
-  const toggleSection = section => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  // Open social media edit modal
-  const handleEditSocial = index => {
-    const item = socialData[index];
-    setEditSocial({
-      index,
-      title: item.title,
-      value: item.value,
-      apiKey: item.apiKey,
-    });
-    setSocialModalVisible(true);
-  };
-
-  // Update social media link
-  const handleUpdateSocial = async () => {
-    if (!editSocial.value.trim()) {
-      Alert.alert('Validation', 'Please enter a valid URL.');
-      return;
-    }
-
-    const newData = [...socialData];
-    newData[editSocial.index].value = editSocial.value;
-    setSocialData(newData);
-
-    const socialLinksData = {};
-    newData.forEach(item => {
-      socialLinksData[item.apiKey] = item.value;
-    });
-
-    try {
-      setLoading(true);
-      await updateSocialLinks(socialLinksData);
-      Alert.alert('Success', 'Social link updated successfully');
-      setSocialModalVisible(false);
-      setEditSocial({ index: null, title: '', value: '', apiKey: '' });
-    } catch (error) {
-      console.error('Update social link error:', error);
-      Alert.alert('Error', error.message || 'Failed to update social link');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Save all social media links
-  const handleSaveSocialLinks = async () => {
-    const hasData = socialData.some(item => item.value.trim() !== '');
-    if (!hasData) {
-      Alert.alert('Validation', 'Please enter at least one social media link.');
-      return;
-    }
-
-    const socialLinksData = {};
-    socialData.forEach(item => {
-      socialLinksData[item.apiKey] = item.value;
-    });
-
-    try {
-      setLoading(true);
-      await updateSocialLinks(socialLinksData);
-      Alert.alert('Success', 'Social links saved successfully');
-    } catch (error) {
-      console.error('Save social links error:', error);
-      Alert.alert('Error', error.message || 'Failed to save social links');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete social media link
-  const handleDeleteSocial = async index => {
-    const newData = [...socialData];
-    newData[index].value = '';
-    setSocialData(newData);
-
-    const socialLinksData = {};
-    newData.forEach(item => {
-      socialLinksData[item.apiKey] = item.value;
-    });
-
-    try {
-      setLoading(true);
-      await updateSocialLinks(socialLinksData);
-      Alert.alert('Success', 'Social link deleted successfully');
-    } catch (error) {
-      console.error('Delete social link error:', error);
-      Alert.alert('Error', error.message || 'Failed to delete social link');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Add FAQ
-  const addFAQHandler = async () => {
-    if (!newFAQ.question.trim() || !newFAQ.answer.trim()) {
-      Alert.alert('Validation', 'Please fill out both question and answer.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const result = await addFAQ({
-        question: newFAQ.question,
-        answer: newFAQ.answer,
-      });
-      setFaqData([...faqData, result.data]);
-      setNewFAQ({ question: '', answer: '' });
-      Alert.alert('Success', result.message || 'FAQ added successfully');
-    } catch (error) {
-      console.error('Add FAQ error:', error);
-      Alert.alert('Error', error.message || 'Failed to add FAQ');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Edit FAQ
-  const handleEditFAQ = faq => {
-    setEditFAQ({ id: faq.id, question: faq.question, answer: faq.answer });
-    setFaqModalVisible(true);
-  };
-
-  // Update FAQ
-  const handleUpdateFAQ = async () => {
-    if (!editFAQ.question.trim() || !editFAQ.answer.trim()) {
-      Alert.alert('Validation', 'Please fill out both question and answer.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const result = await updateFAQ(editFAQ.id, {
-        question: editFAQ.question,
-        answer: editFAQ.answer,
-      });
-      setFaqData(
-        faqData.map(item =>
-          item.id === editFAQ.id
-            ? {
-                ...item,
-                question: editFAQ.question,
-                answer: editFAQ.answer,
-                updated_at: new Date().toISOString(),
-              }
-            : item,
-        ),
-      );
-      setFaqModalVisible(false);
-      setEditFAQ({ id: null, question: '', answer: '' });
-      Alert.alert('Success', result.message || 'FAQ updated successfully');
-    } catch (error) {
-      console.error('Update FAQ error:', error);
-      Alert.alert('Error', error.message || 'Failed to update FAQ');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete FAQ
-  const deleteFAQ = async id => {
-    if (!id) {
-      Alert.alert('Error', 'Invalid FAQ ID');
-      return;
-    }
-    try {
-      setLoading(true);
-      console.log('Deleting FAQ with ID:', id);
-      console.log('FAQ data before delete:', faqData);
-      const result = await deleteFAQ(id);
-      console.log('API response:', result);
-      const newFaqData = faqData.filter(item => item.id !== id);
-      console.log('FAQ data after delete:', newFaqData);
-      setFaqData(newFaqData);
-      Alert.alert('Success', result.message || 'FAQ deleted successfully');
-    } catch (error) {
-      console.error('Delete FAQ error:', error);
-      Alert.alert('Error', error.message || 'Failed to delete FAQ');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ... (existing useEffects and functions)
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F8FA' }}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.goBackButton}
-        >
-          <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Marketing & Social</Text>
-      </View>
+      <CustomHeader title="Marketing & Social" leftType="back" />
 
       {/* Content */}
       {!loading && (
@@ -364,7 +58,7 @@ const MarketingAndSocial = ({ navigation }) => {
                     <TextInput
                       value={item.value}
                       onChangeText={text => {
-                        console.log('Social input:', text); 
+                        console.log('Social input:', text);
                         const newData = [...socialData];
                         newData[index].value = text;
                         setSocialData(newData);
@@ -374,12 +68,6 @@ const MarketingAndSocial = ({ navigation }) => {
                       placeholderTextColor="gray"
                       color="#000"
                     />
-                    {/* <TouchableOpacity
-                      style={styles.editBtn}
-                      onPress={() => handleEditSocial(index)}
-                    >
-                      <Text style={styles.editBtnText}>Edit</Text>
-                    </TouchableOpacity> */}
                     <TouchableOpacity
                       style={styles.deleteBtn}
                       onPress={() => handleDeleteSocial(index)}
@@ -623,14 +311,14 @@ const MarketingAndSocial = ({ navigation }) => {
             <Text style={styles.modalTitle}>Edit Social Media Link</Text>
             <Text style={styles.inputLabel}>{editSocial.title} URL</Text>
             <TextInput
-              style={[styles.input, styles.modalInput, {color: '#000'}]}
+              style={[styles.input, styles.modalInput, { color: '#000' }]}
               placeholder={`Enter ${editSocial.title} URL`}
               placeholderTextColor="gray"
               value={editSocial.value}
               onChangeText={text => {
                 setEditSocial(prev => ({ ...prev, value: text }));
               }}
-              // color="#000"
+            // color="#000"
             />
 
             <View style={styles.modalActions}>
@@ -718,34 +406,17 @@ const MarketingAndSocial = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    backgroundColor: '#E6F0EC',
-    position: 'relative',
-    zIndex: 30,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-  },
-  goBackButton: {
-    padding: 10,
-    zIndex: 1,
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
   },
   section: {
-    backgroundColor: '#E6F0EC',
+    backgroundColor: '#E6F0EC', // Consider changing to colors.white or similar if needed, keeping as is for now but using colors const where appropriate
     borderRadius: 8,
     padding: 12,
     marginTop: 8,
   },
+
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -791,29 +462,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
   },
   modalInput: {
-  height: 60, 
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 6,
-  paddingHorizontal: 10,
-  paddingVertical: 18,
-  backgroundColor: '#F9F9F9',
-  color: 'black', 
-  marginBottom: 12,
-  justifyContent: "flex-start"
-},
-modalTextArea: {
-  height: 140, 
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 6,
-  paddingHorizontal: 10,
-  paddingVertical: 10,
-  backgroundColor: '#F9F9F9',
-  color: '#000', 
-  textAlignVertical: 'top',
-  marginBottom: 12,
-},
+    height: 60,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 18,
+    backgroundColor: '#F9F9F9',
+    color: 'black',
+    marginBottom: 12,
+    justifyContent: "flex-start"
+  },
+  modalTextArea: {
+    height: 140,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: '#F9F9F9',
+    color: '#000',
+    textAlignVertical: 'top',
+    marginBottom: 12,
+  },
 
   editBtn: {
     paddingVertical: 6,

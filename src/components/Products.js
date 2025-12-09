@@ -1,16 +1,40 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 
-const ProductCard = ({ title, value, change, sold }) => (
+// Top Products Data
+export const TOP_PRODUCTS = [
+  { id: '1', title: "Wireless Headphones", value: "$12,540", change: 15, sold: "1254 sold" },
+  { id: '2', title: "Smart Watch", value: "$9,820", change: 8, sold: "982 sold" },
+  { id: '3', title: "Bluetooth Speaker", value: "$7,540", change: 12, sold: "754 sold" },
+  { id: '4', title: "Fitness Tracker", value: "$6,210", change: 5, sold: "621 sold" },
+  { id: '5', title: "USB-C Charger", value: "$2,710", change: 3, sold: "543 sold" },
+];
+
+// Inventory Data
+export const INVENTORY_STATUS = [
+  { id: '1', title: "Wireless Earbuds", current: 12, target: 50 },
+  { id: '2', title: "Phone Case", current: 8, target: 30 },
+  { id: '3', title: "Screen Protector", current: 5, target: 20 },
+  { id: '4', title: "Charging Cable", current: 15, target: 40 },
+];
+
+// Traffic Data
+export const TRAFFIC_SOURCES = [
+  { id: '1', source: "Direct", visitors: "12,345", percentage: 40 },
+  { id: '2', source: "Organic Search", visitors: "9,876", percentage: 30 },
+  { id: '3', source: "Social Media", visitors: "6,789", percentage: 20 },
+  { id: '4', source: "Referral", visitors: "3,456", percentage: 10 },
+];
+
+export const ProductCard = ({ title, value, change, sold }) => (
   <View style={styles.card}>
     <View style={styles.row}>
-
       {/* Left column */}
       <View style={styles.leftColumn}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.sold}>{sold}</Text>
       </View>
-      
+
       {/* Right column */}
       <View style={styles.rightColumn}>
         <Text style={styles.value}>{value}</Text>
@@ -23,7 +47,7 @@ const ProductCard = ({ title, value, change, sold }) => (
 );
 
 // Inventory Card
-const InventoryCard = ({ title, current, target }) => {
+export const InventoryCard = ({ title, current, target }) => {
   const progress = useRef(new Animated.Value(0)).current;
   const percent = Math.min(current / target, 1);
 
@@ -60,7 +84,7 @@ const InventoryCard = ({ title, current, target }) => {
 };
 
 // Traffic Card
-const TrafficCard = ({ source, visitors, percentage }) => {
+export const TrafficCard = ({ source, visitors, percentage }) => {
   const progress = useRef(new Animated.Value(0)).current;
   const percent = Math.min(percentage / 100, 1);
 
@@ -96,82 +120,20 @@ const TrafficCard = ({ source, visitors, percentage }) => {
   );
 };
 
-const Products = () => {
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.header}>🔥 Top Products</Text>
-        <Text style={styles.subHeader}>Best selling products this month</Text>
-        <ProductCard
-          title="Wireless Headphones"
-          value="$12,540"
-          change={15}
-          sold="1254 sold"
-        />
-        <ProductCard
-          title="Smart Watch"
-          value="$9,820"
-          change={8}
-          sold="982 sold"
-        />
-        <ProductCard
-          title="Bluetooth Speaker"
-          value="$7,540"
-          change={12}
-          sold="754 sold"
-        />
-        <ProductCard
-          title="Fitness Tracker"
-          value="$6,210"
-          change={5}
-          sold="621 sold"
-        />
-        <ProductCard
-          title="USB-C Charger"
-          value="$2,710"
-          change={3}
-          sold="543 sold"
-        />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.header}>📦 Inventory Status</Text>
-        <Text style={styles.subHeader}>Products with low stock levels</Text>
-        <InventoryCard title="Wireless Earbuds" current={12} target={50} />
-        <InventoryCard title="Phone Case" current={8} target={30} />
-        <InventoryCard title="Screen Protector" current={5} target={20} />
-        <InventoryCard title="Charging Cable" current={15} target={40} />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.header}>🌏 Traffic Sources</Text>
-        <Text style={styles.subHeader}>Where your visitors are coming from</Text>
-        <TrafficCard source="Direct" visitors="12,345" percentage={40} />
-        <TrafficCard source="Organic Search" visitors="9,876" percentage={30} />
-        <TrafficCard source="Social Media" visitors="6,789" percentage={20} />
-        <TrafficCard source="Referral" visitors="3,456" percentage={10} />
-      </View>
-    </ScrollView>
-  );
-};
-
-export default Products;
-
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
     backgroundColor: '#E7EEE6',
-    paddingBottom: 50 
+    paddingBottom: 50
   },
-  section: { 
-    marginBottom: 20,
+  sectionHeaderContainer: {
+    marginTop: 20,
+    marginBottom: 10,
   },
-  // header: {
-  //   fontSize: 18, 
-  //   fontWeight: 'bold' 
-  // },
-  card: { 
-    padding: 10, 
-    borderWidth: 1, 
-    borderColor: '#ccc', 
+  card: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
     marginVertical: 5,
     borderRadius: 8,
     backgroundColor: '#fff',
@@ -181,36 +143,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  leftColumn: { 
-    flexDirection: 'column', 
-    alignItems: 'flex-start', 
-    flex: 1 
+  leftColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    flex: 1
   },
-  rightColumn: { 
-    flexDirection: 'column', 
-    alignItems: 'flex-end' 
+  rightColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-end'
   },
-  title: { 
-    fontWeight: 'bold', 
-    fontSize: 16 
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16
   },
-  sold: { 
-    color: '#666', 
-    fontSize: 14 
+  sold: {
+    color: '#666',
+    fontSize: 14
   },
-  value: { 
-    fontWeight: 'bold', 
-    fontSize: 16 
+  value: {
+    fontWeight: 'bold',
+    fontSize: 16
   },
-  positive: { 
-    color: 'green', 
+  positive: {
+    color: 'green',
     backgroundColor: "#C8E6C9",
-    fontSize: 14, 
+    fontSize: 14,
     padding: 1.5,
     borderRadius: 8,
     paddingHorizontal: 8
   },
-  negative: { 
+  negative: {
     color: 'red',
     backgroundColor: "#FFCDD2",
     fontSize: 14,

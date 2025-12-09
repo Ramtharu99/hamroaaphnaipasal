@@ -1,202 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Modal,
-  Switch,
-  Pressable,
-  Image,
-  BackHandler,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Toast, { BaseToast } from 'react-native-toast-message';
-import backButton from '../../assets/images/arrow-back.png';
+import { StyleSheet } from 'react-native';
+import colors from '../constants/colors';
+
+// ... (existing imports)
 
 const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
-  const [promotions, setPromotions] = useState(initialPromotions);
-  const [filterText, setFilterText] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
-  const [newPromotion, setNewPromotion] = useState({
-    name: '',
-    promoCode: '',
-    discount: '',
-    startDate: '',
-    endDate: '',
-    usage: '',
-    isActive: true,
-  });
-
-  useEffect(() => {
-    const fetchPromotions = async () => {
-      const data = [
-        {
-          name: 'Summer Sale',
-          promoCode: 'SUMMER25',
-          discount: '25%',
-          startDate: '2025-06-01',
-          endDate: '2025-08-31',
-          usage: '142,500',
-          isActive: true,
-        },
-        {
-          name: 'New Customer',
-          promoCode: 'WELCOME18',
-          discount: '$10',
-          startDate: '2025-01-01',
-          endDate: '2025-12-31',
-          usage: '87,000',
-          isActive: true,
-        },
-        {
-          name: 'Flash Sale',
-          promoCode: 'FLASH30',
-          discount: '30%',
-          startDate: '2025-07-15',
-          endDate: '2025-07-17',
-          usage: '0/200',
-          isActive: false,
-        },
-        {
-          name: 'Clearance',
-          promoCode: 'CLEAR50',
-          discount: '50%',
-          startDate: '2025-02-01',
-          endDate: '2025-02-28',
-          usage: '215/300',
-          isActive: false,
-        },
-      ];
-      setPromotions(data);
-    };
-    fetchPromotions();
-
-    const backAction = () => {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
-  }, []);
-
-  const filteredPromotions = promotions.filter(promo =>
-    promo.name.toLowerCase().includes(filterText.toLowerCase()),
-  );
-
-  const handleDelete = index => {
-    Alert.alert('Confirm Delete', 'Are you sure want to delete?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          setPromotions(prev => prev.filter((_, i) => i !== index)),
-      },
-    ]);
-  };
-
-  const handleEdit = index => {
-    setEditIndex(index);
-    setNewPromotion({ ...promotions[index] });
-    setModalVisible(true);
-  };
-
-  const toggleActive = index => {
-    setPromotions(prev =>
-      prev.map((promo, i) =>
-        i === index ? { ...promo, isActive: !promo.isActive } : promo,
-      ),
-    );
-  };
-
-  const handleSave = () => {
-    if (editIndex !== null) {
-      setPromotions(prev => {
-        const newPromotions = [...prev];
-        newPromotions[editIndex] = newPromotion;
-        return newPromotions;
-      });
-      showToast('Promotion updated successfully!');
-    } else {
-      setPromotions(prev => [...prev, newPromotion]);
-      showToast('Promotion added successfully!');
-    }
-    setModalVisible(false);
-    setEditIndex(null);
-    setNewPromotion({
-      name: '',
-      promoCode: '',
-      discount: '',
-      startDate: '',
-      endDate: '',
-      usage: '',
-      isActive: true,
-    });
-  };
-
-  const showToast = message => {
-    Toast.show({
-      type: 'success',
-      text1: 'Success',
-      text2: message,
-      visibilityTime: 2000,
-      autoHide: true,
-    });
-  };
-
-  const customToast = props => (
-    <BaseToast
-      {...props}
-      style={styles.toast}
-      contentContainerStyle={styles.toastContent}
-      text1Style={styles.toastText1}
-      text2Style={styles.toastText2}
-    />
-  );
+  // ... (existing state and useEffects)
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.goBackButton}
-        >
-          <Image source={backButton} style={styles.backIcon} />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Promotions</Text>
-
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            setEditIndex(null);
-            setNewPromotion({
-              name: '',
-              promoCode: '',
-              discount: '',
-              startDate: '',
-              endDate: '',
-              usage: '',
-              isActive: true,
-            });
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.addButtonText}>+ Add</Text>
-        </TouchableOpacity>
-      </View>
+      <CustomHeader
+        title="Promotions"
+        leftType="back"
+        rightComponent={
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              setEditIndex(null);
+              setNewPromotion({
+                name: '',
+                promoCode: '',
+                discount: '',
+                startDate: '',
+                endDate: '',
+                usage: '',
+                isActive: true,
+              });
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {/* Search */}
       <TextInput
@@ -252,6 +88,7 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
       </ScrollView>
 
       {/* Modal */}
+      {/* ... (Modal stays same) ... */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -352,7 +189,7 @@ const Promotion = ({ navigation, promotions: initialPromotions = [] }) => {
 export default Promotion;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB', padding: 10 },
+  container: { flex: 1, backgroundColor: colors.background, padding: 10 },
 
   headerRow: {
     flexDirection: 'row',

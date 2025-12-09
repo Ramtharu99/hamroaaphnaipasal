@@ -6,11 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  SafeAreaView,
   Pressable,
 } from "react-native";
 
 import Profile from "../screens/Profile";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const icons = {
   Profile: require("../../assets/images/profile.png"),

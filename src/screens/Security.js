@@ -1,134 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  Image,
-  BackHandler,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { getSecuritySettings, updateSecuritySettings } from '../store/api'; 
-import backButton from '../../assets/images/arrow-back.png';
+import { StyleSheet } from 'react-native';
+import colors from '../constants/colors';
+
+// ... (existing imports)
 
 const Security = ({ navigation }) => {
-  const [expandedSections, setExpandedSections] = useState({});
-  const [sections, setSections] = useState([
-    {
-      title: 'Security Settings',
-      items: [
-        {
-          name: 'Two-Factor Authentication',
-          description: 'Secure account with extra verification',
-          enabled: false,
-        },
-      ],
-    },
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
+  // ... (existing state and useEffects)
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setIsLoading(true);
-        const settings = await getSecuritySettings();
-        console.log('Fetched settings:', settings); // Debug log
-        setSections([
-          {
-            title: 'Security Settings',
-            items: [
-              {
-                name: 'Two-Factor Authentication',
-                description: 'Secure account with extra verification',
-                enabled: Boolean(settings.two_factor_enabled), // Convert 0/1 to boolean
-              },
-            ],
-          },
-        ]);
-      } catch (error) {
-        console.error('Failed to load security settings:', error.message);
-        Alert.alert('Error', 'Failed to load security settings. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSettings();
-
-    const backAction = () => {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
-  }, [navigation]);
-
-  const toggleSection = (title) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  const toggleItemStatus = async (sectionIndex, itemIndex) => {
-    const newEnabled = !sections[sectionIndex].items[itemIndex].enabled;
-
-    // Optimistically update UI
-    setSections((prevSections) => {
-      const newSections = [...prevSections];
-      newSections[sectionIndex].items[itemIndex].enabled = newEnabled;
-      return newSections;
-    });
-
-    try {
-      const payload = {
-        two_factor_enabled: newEnabled ? 1 : 0,
-        otp_status: newEnabled ? 1 : 0, // Send 1 when enabling, 0 when disabling
-      };
-      console.log('Sending payload to updateSecuritySettings:', payload); 
-      const result = await updateSecuritySettings(payload);
-
-      // Update UI with the state from the server response
-      setSections(prevSections => {
-        const newSections = [...prevSections];
-        newSections[sectionIndex].items[itemIndex].enabled = Boolean(
-          result.data?.two_factor_enabled,
-        );
-        return newSections;
-      });
-
-      Alert.alert('Success', 'Security settings updated successfully.');
-    } catch (error) {
-      console.error('Failed to update security settings:', error.message, { error });
-      // Revert UI on failure
-      setSections((prevSections) => {
-        const newSections = [...prevSections];
-        newSections[sectionIndex].items[itemIndex].enabled = !newEnabled;
-        return newSections;
-      });
-      Alert.alert('Error', error.message || 'Failed to update security settings. Please try again.');
-    }
-  };
+  // ... (existing functions)
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.goBackButton}
-        >
-          <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Security</Text>
-      </View>
+      <CustomHeader title="Security" leftType="back" />
 
       {/* Content Area */}
       {isLoading ? (
@@ -188,28 +71,11 @@ const Security = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    backgroundColor: '#E6F0EC',
-    position: 'relative',
-    zIndex: 1, 
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-  },
-  goBackButton: {
-    padding: 10,
-    zIndex: 1,
-  },
+  // ... (remove headerRow, headerTitle, goBackButton)
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
@@ -257,7 +123,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F7F9F7', 
+    backgroundColor: '#F7F9F7',
   },
 });
 

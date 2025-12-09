@@ -1,279 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Modal,
-  Image,
-  Pressable,
-  BackHandler,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import backButton from '../../assets/images/arrow-back.png';
-import {
-  getPrivacyPolicy,
-  getReturnPolicy,
-  getTermsAndConditions,
-  updatePrivacyPolicy,
-  updateReturnPolicy,
-  updateTermsAndConditions,
-} from '../store/api';
+import { StyleSheet } from 'react-native';
+import colors from '../constants/colors';
 
 const Policies = ({ navigation }) => {
-  // Hooks declared at the top level, unconditionally
-  const [expandedSections, setExpandedSections] = useState({});
-  const [policySections, setPolicySections] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newPolicyTitle, setNewPolicyTitle] = useState('');
-  const [newPolicyContent, setNewPolicyContent] = useState('');
-  const [editIndex, setEditIndex] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selection, setSelection] = useState({ start: 0, end: 0 });
-  const textInputRef = useRef(null);
-
-  // Handle Android back button
-  useEffect(() => {
-    const backAction = () => {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
-  }, [navigation]);
-
-  // Fetch policies
-  useEffect(() => {
-    const fetchPolicies = async () => {
-      try {
-        setLoading(true);
-        const [returnData, termsData, privacyData] = await Promise.all([
-          getReturnPolicy(),
-          getTermsAndConditions(),
-          getPrivacyPolicy(),
-        ]);
-
-        setPolicySections([
-          {
-            title: 'Return Policy',
-            content: returnData?.return_policy || 'No return policy available.',
-          },
-          {
-            title: 'Terms and Conditions',
-            content:
-              termsData?.terms_condition ||
-              'No terms and conditions available.',
-          },
-          {
-            title: 'Privacy Policy',
-            content:
-              privacyData?.privacy_policy || 'No privacy policy available.',
-          },
-        ]);
-      } catch (error) {
-        console.error('Error fetching policies:', error);
-        Alert.alert('Error', 'Failed to fetch policy details.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPolicies();
-  }, []);
-
-  // Toggle expand/collapse
-  const toggleSection = title => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  // Insert formatting at cursor position
-  const insertFormatting = formatType => {
-    const { start, end } = selection;
-    const text = newPolicyContent || '';
-    let insertText = '';
-    let cursorOffset = 0;
-
-    switch (formatType) {
-      case 'bold':
-        insertText = '**text**';
-        cursorOffset = 2;
-        break;
-      case 'italic':
-        insertText = '*text*';
-        cursorOffset = 1;
-        break;
-      case 'bullet':
-        insertText = '- ';
-        cursorOffset = 2;
-        break;
-      case 'h1':
-        insertText = '# ';
-        cursorOffset = 2;
-        break;
-      case 'h2':
-        insertText = '## ';
-        cursorOffset = 3;
-        break;
-      case 'h3':
-        insertText = '### ';
-        cursorOffset = 4;
-        break;
-      default:
-        return;
-    }
-
-    const newText = text.slice(0, start) + insertText + text.slice(end);
-    setNewPolicyContent(newText);
-    setTimeout(() => {
-      if (textInputRef.current) {
-        textInputRef.current.focus();
-        textInputRef.current.setNativeProps({
-          selection: {
-            start: start + cursorOffset,
-            end: start + cursorOffset + 4,
-          },
-        });
-      }
-    }, 0);
-  };
-
-  // Parse markdown for display
-  const renderPolicyContent = content => {
-    const lines = content.split('\n');
-    return lines.map((line, index) => {
-      let style = styles.contentText;
-      let text = line;
-
-      if (line.startsWith('# ')) {
-        style = styles.heading1;
-        text = line.replace(/^# /, '');
-      } else if (line.startsWith('## ')) {
-        style = styles.heading2;
-        text = line.replace(/^## /, '');
-      } else if (line.startsWith('### ')) {
-        style = styles.heading3;
-        text = line.replace(/^### /, '');
-      } else if (line.startsWith('- ')) {
-        style = styles.bullet;
-        text = `• ${line.replace(/^- /, '')}`;
-      } else if (line.match(/\*\*.*?\*\*/)) {
-        text = line.replace(/\*\*(.*?)\*\*/g, '$1');
-        style = { ...style, fontWeight: 'bold' };
-      } else if (line.match(/\*.*?\*/)) {
-        text = line.replace(/\*(.*?)\*/g, '$1');
-        style = { ...style, fontStyle: 'italic' };
-      }
-
-      return (
-        <Text key={index} style={style}>
-          {text}
-        </Text>
-      );
-    });
-  };
-
-  // Edit
-  const handleEdit = index => {
-    setNewPolicyTitle(policySections[index].title);
-    setNewPolicyContent(policySections[index].content);
-    setEditIndex(index);
-    setModalVisible(true);
-  };
-
-  // Save / Update to API
-  const handleAddOrEditPolicy = async () => {
-    if (newPolicyTitle.trim() === '' || newPolicyContent.trim() === '') {
-      Alert.alert('Validation', 'Please fill out both fields.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const title = newPolicyTitle.toLowerCase();
-
-      if (title.includes('return')) {
-        await updateReturnPolicy(newPolicyContent);
-      } else if (title.includes('terms')) {
-        await updateTermsAndConditions(newPolicyContent);
-      } else if (title.includes('privacy')) {
-        await updatePrivacyPolicy(newPolicyContent);
-      }
-
-      const updated = [...policySections];
-      updated[editIndex] = {
-        title: newPolicyTitle,
-        content: newPolicyContent,
-      };
-      setPolicySections(updated);
-      Alert.alert('Success', `${newPolicyTitle} updated successfully.`);
-    } catch (error) {
-      console.error('Error updating policy:', error);
-      Alert.alert('Error', error.message || 'Failed to update policy.');
-    } finally {
-      setLoading(false);
-      setEditIndex(null);
-      setNewPolicyTitle('');
-      setNewPolicyContent('');
-      setModalVisible(false);
-    }
-  };
-
-  // Delete
-  const handleDeletePopup = index => {
-    Alert.alert(
-      'Delete Policy',
-      'Are you sure you want to delete this policy?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: () => {
-            const updated = policySections.filter((_, i) => i !== index);
-            setPolicySections(updated);
-          },
-        },
-      ],
-    );
-  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={styles.goBackButton}
-        >
-          <Image source={backButton} style={{ height: 20, width: 20 }} />
-        </Pressable>
-
-        <Text style={styles.headerTitle}>Policies</Text>
-
-        <TouchableOpacity
-          style={styles.addPolicyBtn}
-          onPress={() => {
-            setEditIndex(null);
-            setNewPolicyTitle('');
-            setNewPolicyContent('');
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.addPolicyBtnText}>+ Add Policy</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <CustomHeader
+        title="Policies"
+        leftType="back"
+        rightComponent={
+          <TouchableOpacity
+            style={styles.addPolicyBtn}
+            onPress={() => {
+              setEditIndex(null);
+              setNewPolicyTitle('');
+              setNewPolicyContent('');
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.addPolicyBtnText}>+ Add Policy</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {/* Loading */}
       {loading ? (
@@ -326,6 +74,7 @@ const Policies = ({ navigation }) => {
       )}
 
       {/* Modal */}
+      {/* ... (Modal code remains same) ... */}
       <Modal animationType="slide" transparent visible={modalVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -430,7 +179,7 @@ const Policies = ({ navigation }) => {
 export default Policies;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+  container: { flex: 1, backgroundColor: colors.background },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

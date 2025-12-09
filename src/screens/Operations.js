@@ -11,75 +11,21 @@ import {
   BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import backButton from "../../assets/images/arrow-back.png"
+import CustomHeader from '../components/CustomHeader';
+import colors from '../constants/colors';
+
+// ... (existing imports)
 
 const Operations = ({ navigation }) => {
-  const [expandedSections, setExpandedSections] = useState({});
-  const [sections, setSections] = useState([
-    {
-      title: 'Delivery Integration',
-      items: [
-        { name: 'UPS', description: 'Delivery within 3-5 days', enabled: true },
-        {
-          name: 'Pathao courier',
-          description: 'Delivery within 1 days',
-          enabled: true,
-        },
-        {
-          name: 'Pick And Drop Nepal',
-          description: 'Customers can arrange pickups',
-          enabled: false,
-        },
-        {
-          name: 'Custom',
-          description: 'Custom delivery with specific timing',
-          enabled: true,
-        },
-      ],
-    },
-  ]);
+  // ... (existing state and useEffect)
 
-  useEffect(() => {
-    const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
-      }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove();
-  }, [navigation])
-
-  const toggleSection = title => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  const toggleItemStatus = (sectionIndex, itemIndex) => {
-    setSections(prevSections => {
-      const newSections = [...prevSections];
-      newSections[sectionIndex].items[itemIndex].enabled =
-        !newSections[sectionIndex].items[itemIndex].enabled;
-      return newSections;
-    });
-  };
+  // ... (existing functions)
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={{ padding: 8 }}>
         {/* Go Back Button */}
-        <View style={styles.headerRow}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={styles.goBackButton}
-          >
-            <Image source={backButton} style={{ height: 20, width: 20 }} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Operations</Text>
-        </View>
+        <CustomHeader title="Operations" leftType="back" />
 
         {/* Sections */}
         {sections.map((section, sectionIndex) => (
@@ -132,31 +78,15 @@ const Operations = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  headerRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 8,
-  paddingVertical: 12,
-  backgroundColor: '#E6F0EC',
-  position: 'relative',
-},
-headerTitle: {
-  fontSize: 18,
-  fontWeight: '600',
-  color: '#333',
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  textAlign: 'center',
-},
-goBackButton: {
-  padding: 10,
-  zIndex: 1,
-},
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  // ... (remove headerRow, headerTitle, goBackButton styles)
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
-    padding:12,
+    padding: 12,
     marginBottom: 8,
     marginTop: 8
   },

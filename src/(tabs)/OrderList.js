@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomHeader from '../components/CustomHeader';
+import colors from '../constants/colors';
 
 const orders = [
   {
@@ -113,7 +115,7 @@ const OrderItem = ({ item }) => (
     <Text style={styles.orderId}>{item.id}</Text>
     <View style={styles.customer}>
       <Text style={styles.customerName}>{item.customer}</Text>
-      <Text style={styles.email}>{item.email.length > 18 ? item.email.slice(0, 8) + "***"  : item.email}</Text>
+      <Text style={styles.email}>{item.email.length > 18 ? item.email.slice(0, 8) + "***" : item.email}</Text>
     </View>
     <Text style={styles.date}>{item.date}</Text>
     <View style={styles.statusContainer}>
@@ -140,7 +142,13 @@ const ListHeader = () => (
   </View>
 );
 
-const OrdersList = ({navigation}) => {
+
+
+// ... (existing imports)
+
+// ... (existing constants)
+
+const OrdersList = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
@@ -152,7 +160,7 @@ const OrdersList = ({navigation}) => {
 
   useEffect(() => {
     const backAction = () => {
-      if(navigation.canGoBack()){
+      if (navigation.canGoBack()) {
         navigation.goBack();
         return true;
       }
@@ -163,25 +171,27 @@ const OrdersList = ({navigation}) => {
   }, [navigation])
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>📦 Recent Orders</Text>
-        <Text style={styles.subText}>
-          Latest customer orders from your store
-        </Text>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <CustomHeader title="Recent Orders" leftType="avatar" />
+      <View style={styles.contentContainer}>
+        <View style={styles.header}>
+          <Text style={styles.subText}>
+            Latest customer orders from your store
+          </Text>
+        </View>
+        <FlatList
+          data={orders}
+          renderItem={({ item }) => <OrderItem item={item} />}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={ListHeader}
+          stickyHeaderIndices={[0]}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
       </View>
-      <FlatList
-        data={orders}
-        renderItem={({ item }) => <OrderItem item={item} />}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={ListHeader}
-        stickyHeaderIndices={[0]}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
     </SafeAreaView>
   );
 };
@@ -191,9 +201,12 @@ export default OrdersList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  contentContainer: {
+    flex: 1,
     padding: 16,
-    backgroundColor: '#E7EEE6',
-    paddingBottom: 40,
+    paddingBottom: 0,
   },
   header: {
     marginBottom: 14,
@@ -208,6 +221,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 4,
   },
+  // ... (rest of styles)
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

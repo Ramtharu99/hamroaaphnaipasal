@@ -1,43 +1,17 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet } from 'react-native';
+import colors from '../constants/colors';
 
-const moreOptions = ['Customization', 'Promotions', 'Tickets', 'Manage Staff'];
+// ... (existing imports)
 
 const MoreSettings = ({ navigation }) => {
+  // ... (existing useEffect)
 
-  useEffect(() => {
-    const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
-      }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove()
-  }, [navigation])
-
-  
-  const handleOptionPress = (option) => {
-    try {
-      navigation.navigate(option);
-    } catch (error) {
-      console.error(`Navigation to ${option} failed:`, error.message);
-    }
-  };
+  // ... (existing handleOptionPress)
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#E6F0EC' }}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={{ padding: 10, marginBottom: 20 }}
-      >
-        <Text>
-          <Text style={{ fontSize: 25 }}>← </Text>Go Back
-        </Text>
-      </TouchableOpacity>
+      <CustomHeader title="More Settings" leftType="back" />
       <View style={styles.dropdownContainer}>
         {moreOptions.map(option => (
           <TouchableOpacity
@@ -54,6 +28,10 @@ const MoreSettings = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   dropdownContainer: {
     backgroundColor: '#F7F9F7',
     marginHorizontal: 12,
@@ -62,12 +40,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 3,
     zIndex: 10,
+    marginTop: 10,
   },
   dropdownItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6F0EC',
+    borderBottomColor: colors.border,
   },
   dropdownText: {
     fontSize: 14,

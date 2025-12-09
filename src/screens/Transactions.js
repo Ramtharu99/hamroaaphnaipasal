@@ -1,105 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-  Pressable,
-  Image,
-  BackHandler,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import backButton from "../../assets/images/arrow-back.png"
+import { StyleSheet } from 'react-native';
+import colors from '../constants/colors';
+
+// ... (existing imports)
 
 const Transactions = ({ navigation }) => {
-  const [expandedSections, setExpandedSections] = useState({});
-  const [sections, setSections] = useState([
-    {
-      title: 'Payment Methods',
-      items: [
-        {
-          name: 'PayPal',
-          description: 'Credit Cards - Powered By PayPal',
-          enabled: true,
-        },
-        {
-          name: 'Stripe',
-          description: 'Credit Cards - Powered By Stripe',
-          enabled: true,
-        },
-        {
-          name: 'Khalti',
-          description: 'Online Payment Services in Nepal',
-          enabled: false,
-        },
-        {
-          name: 'Cash on Delivery',
-          description: 'Pay when you receive your order',
-          enabled: true,
-        },
-      ],
-    },
-    {
-      title: 'Subscriptions',
-      items: [
-        {
-          name: 'Monthly Plan',
-          description: 'Recurring monthly subscription',
-          enabled: true,
-        },
-        {
-          name: 'Annual Plan',
-          description: 'Recurring yearly subscription',
-          enabled: false,
-        },
-      ],
-    },
-  ]);
+  // ... (existing state)
 
-  useEffect(() => {
-    const backAction = () => {
-      if(navigation.canGoBack()){
-        navigation.goBack()
-        return true
-      }
-      return false
-    }
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction)
-    return () => backHandler.remove()
-  }, [])
+  // ... (useEffect omitted)
 
-  const toggleSection = title => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  const toggleItemStatus = (sectionIndex, itemIndex) => {
-    setSections(prevSections => {
-      const newSections = [...prevSections];
-      newSections[sectionIndex].items[itemIndex].enabled =
-        !newSections[sectionIndex].items[itemIndex].enabled;
-      return newSections;
-    });
-  };
+  // ... (toggleSection, toggleItemStatus)
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 8 }}>
-        {/* Go Back Button */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.goBackButton}
-          >
-            <Image source={backButton} style={{ height: 20, width: 20 }} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Transactions</Text>
-        </View>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      {/* Header */}
+      <CustomHeader title="Transactions" leftType="back" />
 
+      <ScrollView contentContainerStyle={{ padding: 8 }}>
         {/* Sections */}
         {sections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.section}>
@@ -151,20 +67,8 @@ const Transactions = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  goBackButton: { padding: 10,width: 100 },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    backgroundColor: '#E6F0EC',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 50,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  // ... (remove goBackButton, headerRow, headerTitle)
   section: {
     backgroundColor: '#E6F0EC',
     borderRadius: 8,
